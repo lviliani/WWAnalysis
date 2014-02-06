@@ -225,6 +225,7 @@ const float reco::SkimEvent::HEPMCweightFac(size_t i) const {
 void reco::SkimEvent::setLepton(const edm::Handle<edm::View<reco::RecoCandidate> > &h,size_t i){
   //std::cout << "setting lepton with collection ID: " << h->ptrAt(i).id() << std::endl;
   leps_.push_back( h->ptrAt(i) );
+//   std::cout << " >> leps_ = " << leps_.size() << std::endl;
 }
 
 void reco::SkimEvent::setExtraLepton(const edm::Handle<edm::View<reco::RecoCandidate> > &h,size_t i){
@@ -308,6 +309,10 @@ void reco::SkimEvent::setChargedMet(const reco::PFMET & chMET) {
 
 void reco::SkimEvent::setGenMet(const edm::Handle<reco::GenMETCollection> & mH) {
     genMet_ = reco::GenMETRef(mH,0);
+}
+
+void reco::SkimEvent::setPFMetTypeI(const edm::Handle<reco::PFMETCollection> & mH) {
+ pfMetTypeI_ = reco::PFMETRef(mH,0);
 }
 
 
@@ -439,7 +444,10 @@ const int reco::SkimEvent::passCustom(size_t i, const std::string &muStr, const 
 const float reco::SkimEvent::leptBdt(size_t i) const {
   if(i >= leps_.size()) return -9999.0;
   if( isElectron(i) ) return getElectron(i)->userFloat("bdttrig"); // changed from "bdt" to "bdttrig"
+//   else                return 999999.;
+  if( isMuon(i) )     return getMuon(i)->userFloat("bdtisonontrigDZ");
   else                return 999999.;
+  
 }
 
 const float reco::SkimEvent::leptLH(size_t i) const {
@@ -1515,6 +1523,23 @@ const float reco::SkimEvent::tcMetY() const {
     if(tcMet_.isNonnull()) return tcMet_->py();
     else return -9999.0;
 }
+
+
+
+const float reco::SkimEvent::pfMetTypeI() const {
+
+ if(pfMetTypeI_.isNonnull()) return pfMetTypeI_->pt();
+ else return -9999.0;
+}
+
+const float reco::SkimEvent::pfMetTypeIPhi() const {
+
+ if(pfMetTypeI_.isNonnull()) return pfMetTypeI_->phi();
+ else return -9999.0;
+}
+
+
+
 
 const float reco::SkimEvent::mll() const {
   if(leps_.size() < 2) return -9999.0;

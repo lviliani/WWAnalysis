@@ -286,6 +286,8 @@ namespace reco {
             const float chargedMetSmurfPhi() const{return chargedMetSmurf_.phi();}
             const float pfMetSignificance() const;
             const float pfMetMEtSig() const;
+            const float pfMetTypeI() const ;
+            const float pfMetTypeIPhi() const ;
             //const float minMet() const;
             //const math::XYZTLorentzVector minMetP4() const;
             const float mll() const;
@@ -410,6 +412,7 @@ namespace reco {
             void setTagJets(const edm::Handle<pat::JetCollection> &);
             void setTCMet(const edm::Handle<reco::METCollection> &);
             void setPFMet(const edm::Handle<reco::PFMETCollection> &);
+            void setPFMetTypeI(const edm::Handle<reco::PFMETCollection> &);
             void setMvaMet(const reco::PFMET &met) {mvaMet_ = met;}
             void setChargedMet(const reco::PFMET &);
             void setChargedMetSmurf(const reco::MET& met) {chargedMetSmurf_ = met;}
@@ -549,6 +552,7 @@ namespace reco {
             reco::PFMET mvaMet_;
             reco::PFMET chargedMet_;
             reco::MET chargedMetSmurf_;
+            reco::PFMETRef pfMetTypeI_;
             std::vector<refToCand> leps_;
             std::vector<refToCand> extraLeps_;
             std::vector<refToCand> softMuons_;

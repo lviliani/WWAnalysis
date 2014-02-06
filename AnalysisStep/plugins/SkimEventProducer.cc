@@ -48,7 +48,8 @@ SkimEventProducer::SkimEventProducer(const edm::ParameterSet& cfg) :
     fatJetTag_         = cfg.getParameter<edm::InputTag>("fatJetTag" ); 
     pfMetTag_          = cfg.getParameter<edm::InputTag>("pfMetTag"  ); 
     tcMetTag_          = cfg.getParameter<edm::InputTag>("tcMetTag"  ); 
-    chargedMetTag_     = cfg.getParameter<edm::InputTag>("chargedMetTag" ); 
+    chargedMetTag_     = cfg.getParameter<edm::InputTag>("chargedMetTag" );
+    pfMetTypeITag_      = cfg.getParameter<edm::InputTag>("pfMetTypeITag" );
     vtxTag_            = cfg.getParameter<edm::InputTag>("vtxTag"        );
     //    allCandsTag_    = cfg.getParameter<edm::InputTag>("allCandsTag"   );  // Needed for MVAMet
     chCandsTag_        = cfg.getParameter<edm::InputTag>("chCandsTag"    ); 
@@ -106,6 +107,9 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 
 //    edm::Handle<edm::ValueMap<reco::PFMET> > chargedMetH;
 //    iEvent.getByLabel(chargedMetTag_,chargedMetH);
+
+    edm::Handle<reco::PFMETCollection> pfMetTypeIH;
+    iEvent.getByLabel(pfMetTypeITag_,pfMetTypeIH);
 
     edm::Handle<reco::VertexCollection> vtxH;
     iEvent.getByLabel(vtxTag_,vtxH);
@@ -187,6 +191,7 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 
     if(hypoType_==reco::SkimEvent::WWELEL){//ELEL
 //      std::cout << " reco::SkimEvent::WWELEL " << std::endl;
+//      std::cout << "     electrons->size() = " << electrons->size() << std::endl;
         for(size_t i=0;i<electrons->size();++i) {
             for(size_t j=i+1;j<electrons->size();++j) {
              float deltall = ROOT::Math::VectorUtil::DeltaR(electrons->at(i).p4(),electrons->at(j).p4());
@@ -220,6 +225,7 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
                  skimEvent->back().setPFMet(pfMetH);
 //                skimEvent->back().setTCMet(tcMetH);
 //                skimEvent->back().setChargedMet(chargedMetH->get(0));
+                 skimEvent->back().setPFMetTypeI(pfMetTypeIH);
                  skimEvent->back().setVertex(vtxH);
                  if(sptH.isValid()   ) skimEvent->back().setVtxSumPts(sptH);
                  if(spt2H.isValid()  ) skimEvent->back().setVtxSumPt2s(spt2H);
@@ -292,6 +298,7 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
         skimEvent->back().setPFMet(pfMetH);
 //                skimEvent->back().setTCMet(tcMetH);
 //                skimEvent->back().setChargedMet(chargedMetH->get(0));
+        skimEvent->back().setPFMetTypeI(pfMetTypeIH);
         skimEvent->back().setVertex(vtxH);
         if(sptH.isValid()   ) skimEvent->back().setVtxSumPts(sptH);
         if(spt2H.isValid()  ) skimEvent->back().setVtxSumPt2s(spt2H);
@@ -361,6 +368,7 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
                 skimEvent->back().setPFMet(pfMetH);
 //                skimEvent->back().setTCMet(tcMetH);
 //                skimEvent->back().setChargedMet(chargedMetH->get(0));
+                skimEvent->back().setPFMetTypeI(pfMetTypeIH);
                 skimEvent->back().setVertex(vtxH);
                 if(sptH.isValid()   ) skimEvent->back().setVtxSumPts(sptH);
                 if(spt2H.isValid()  ) skimEvent->back().setVtxSumPt2s(spt2H);
@@ -431,6 +439,7 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
                 skimEvent->back().setPFMet(pfMetH);
 //                skimEvent->back().setTCMet(tcMetH);
 //                skimEvent->back().setChargedMet(chargedMetH->get(0));
+                skimEvent->back().setPFMetTypeI(pfMetTypeIH);
                 skimEvent->back().setVertex(vtxH);
                 if(sptH.isValid()   ) skimEvent->back().setVtxSumPts(sptH);
                 if(spt2H.isValid()  ) skimEvent->back().setVtxSumPt2s(spt2H);
