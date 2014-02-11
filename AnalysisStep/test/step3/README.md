@@ -4,8 +4,9 @@ How to run step 2+3
 for MC
 
     cd src/WWAnalysis/AnalysisStep/test/step3
-    cmsRun step3.py print inputFiles=file:/tmp/amassiro/latinosYieldSkim_MC_WWmg.root  label=WW id=123456789  scale=1 outputFile=/tmp/amassiro/step3_latinosYieldSkim_MC_WWmg.root
-    cmsRun step3.py print inputFiles=file:/tmp/amassiro/latinosYieldSkim_MC_HH.root    label=HH id=123456789  scale=1 outputFile=/tmp/amassiro/step3_latinosYieldSkim_MC_HH.root
+    cmsRun step3.py print inputFiles=file:/tmp/amassiro/latinosYieldSkim_MC_WWmg.root             label=WW id=123456789  scale=1 outputFile=/tmp/amassiro/step3_latinosYieldSkim_MC_WWmg.root
+    cmsRun step3.py print inputFiles=file:/tmp/amassiro/latinosYieldSkim_MC_WWmg_numEvent50.root  label=WW id=123456789  scale=1 outputFile=/tmp/amassiro/step3_latinosYieldSkim_MC_WWmg.root       doNoFilter=True
+    cmsRun step3.py print inputFiles=file:/tmp/amassiro/latinosYieldSkim_MC_HH.root               label=HH id=123456789  scale=1 outputFile=/tmp/amassiro/step3_latinosYieldSkim_MC_HH.root
 
 
 

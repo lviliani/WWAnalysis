@@ -57,6 +57,8 @@ class SkimEventProducer : public edm::EDProducer {
         virtual void endJob() ;
 	reco::MET doChMET(edm::Handle<reco::CandidateView> candsH,
 			  const reco::Candidate* cand1,const reco::Candidate* cand2);
+    reco::MET doChMET(edm::Handle<reco::CandidateView> candsH,
+                      const reco::Candidate* cand1 = 0x0);
  
         std::string branchAlias_;
     	reco::SkimEvent::hypoType hypoType_;

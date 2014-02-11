@@ -106,7 +106,7 @@ def addEventHypothesis(process,label,thisMuTag,thisEleTag,thisSoftMuTag='wwMuons
     tempSkimEventFilter = cms.EDFilter("SkimEventSelector",
        src = cms.InputTag(""),
        filter = cms.bool(True),
-       cut = cms.string("nLep >=2 "),                                   
+       cut = cms.string("nLep >=2 "),
     )
 
     for hypo in hypos:

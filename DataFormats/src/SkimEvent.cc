@@ -69,6 +69,8 @@ const reco::GenParticle *reco::SkimEvent::genParticle(size_t i) const {
 
 const reco::GenParticleRef reco::SkimEvent::getMotherID(size_t i) const {
 
+    if(i >= leps_.size()) return reco::GenParticleRef();
+
     const reco::GenParticle *match = isMuon(i) ? getMuon(i)->genLepton() : getElectron(i)->genLepton();
 
     if( !match )                    return reco::GenParticleRef();
@@ -624,8 +626,9 @@ const float reco::SkimEvent::dPhiJetll(size_t leadingIndex,float minPt,float eta
             break;
         }
     }
-    return fabs(ROOT::Math::VectorUtil::DeltaPhi(leps_[0]->p4() + leps_[1]->p4(), jets_[newIndex]->p4()) );   
 
+    if(leps_.size() < 2) return -9999.0;
+    return fabs(ROOT::Math::VectorUtil::DeltaPhi(leps_[0]->p4() + leps_[1]->p4(), jets_[newIndex]->p4()) );   
 }
 
 const pat::Jet* reco::SkimEvent::leadingJet(size_t index, float minPt,float eta,int applyCorrection,int applyID) const {
@@ -1172,6 +1175,8 @@ const int reco::SkimEvent::nCentralJets(float minPt,float eta,int applyCorrectio
 }
 
 const bool reco::SkimEvent::passesDPhillJet(float ptMin, float eta,int applyCorrection,int applyID) const {
+    if(leps_.size() < 2) return -9999.0;
+
     float dphi = 0, ptMax = 0;
     for(size_t i=0;i<jets_.size();++i) {
       if(!(passJetID(jets_[i],applyID)) ) continue;
@@ -1188,6 +1193,7 @@ const bool reco::SkimEvent::passesDPhillJet(float ptMin, float eta,int applyCorr
 }
 
 const float reco::SkimEvent::dPhillLeadingJet(float eta,int applyCorrection,int applyID) const {
+    if(leps_.size() < 2) return -9999.0;
     float dphi = 0, ptMax = 0;
     for(size_t i=0;i<jets_.size();++i) {
       if(!(passJetID(jets_[i],applyID)) ) continue;
@@ -1218,6 +1224,7 @@ const int reco::SkimEvent::leadingJetIndex(size_t index, float minPt,float eta,i
 }
 
 const float reco::SkimEvent::dPhilljetjet(float eta,int applyCorrection,int applyID) const {
+    if(leps_.size() < 2) return -9999.0;
     float dphi = -1;
     int jet1 = leadingJetIndex(0,0,eta,applyCorrection,applyID);
     int jet2 = leadingJetIndex(1,0,eta,applyCorrection,applyID);
@@ -1837,6 +1844,8 @@ const bool reco::SkimEvent::leptEtaCut(float maxAbsEtaMu,float maxAbsEtaEl) cons
   bool check0(true);
   bool check1(true);
 
+  if(leps_.size() < 2) return true;
+
   if(abs(leps_[0]->pdgId())==11 && fabs(leps_[0]->eta())>=maxAbsEtaEl) check0=false;
   if(abs(leps_[0]->pdgId())==13 && fabs(leps_[0]->eta())>=maxAbsEtaMu) check0=false;
 
@@ -2272,6 +2281,8 @@ const reco::Vertex reco::SkimEvent::highestPtVtx() const {
 }
 
 const bool reco::SkimEvent::passesIP() const {
+    if(leps_.size() < 2) return -9999.0;
+
     return (passesIP(leps_[0]) && passesIP(leps_[1]));
 }
 
@@ -2721,6 +2732,8 @@ const float reco::SkimEvent::matchedJetPt(size_t i, float minDr, bool applyCorre
 
 // New emanuele gamma mr star thingy
 const float reco::SkimEvent::mRStar() const {
+  if(leps_.size() < 2) return -9999.0;
+
   float A = leps_[0]->p();
   float B = leps_[1]->p();
   float az = leps_[0]->pz();
@@ -2736,6 +2749,8 @@ const float reco::SkimEvent::mRStar() const {
 }
 
 const float reco::SkimEvent::gamma() const {
+  if(leps_.size() < 2) return -9999.0;
+
   float A = leps_[0]->p();
   float B = leps_[1]->p();
   float az = leps_[0]->pz();

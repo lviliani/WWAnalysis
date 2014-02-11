@@ -114,6 +114,12 @@ options.register ('doGen',
                        opts.VarParsing.varType.bool,
                        'Turn on gen Variables dumper (can be \'True\' or \'False\'')
 
+options.register ('doNoFilter',
+                  False,                                    # default value
+                  opts.VarParsing.multiplicity.singleton,   # singleton or list
+                  opts.VarParsing.varType.bool,
+                  'Turn on no filter requirement, not even requiring 2 leptons! Needed for unfolding at GEN (can be \'True\' or \'False\'')
+
 
 #-------------------------------------------------------------------------------
 # defaults
@@ -257,7 +263,9 @@ doGen            = options.doGen
 doHiggs          = options.doHiggs
 doSusy           = options.doSusy
 doTauEmbed       = options.doTauEmbed
-SameSign         = options.doSameSign  
+SameSign         = options.doSameSign
+doNoFilter       = options.doNoFilter
+
 
 id = 0
 json    = None
@@ -552,6 +560,18 @@ if IsoStudy:
 if SameSign:
   for X in "elel", "mumu", "elmu", "muel", "ellell":
     getattr(process,"%sTree"% X).cut = cms.string("q(0)*q(1) > 0 && !isSTA(0) && !isSTA(1) && leptEtaCut(2.4,2.5) && ptMax > 20 && ptMin > 10")
+
+
+# save all events
+if doNoFilter:
+  print ">> Dump all events"
+
+  for X in "elel", "mumu", "elmu", "muel", "ellell":
+    getattr(process,"%sTree"% X).cut = cms.string("1")
+
+  for X in "elel", "mumu", "elmu", "muel":
+    getattr(process,"skim%s%s"% (X,label)).cut = cms.string("nLep >= 0")
+
 
 
 
