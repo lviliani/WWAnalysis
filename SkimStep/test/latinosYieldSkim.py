@@ -82,6 +82,13 @@ options.register ('doSusy',
                   opts.VarParsing.varType.bool,
                   'Turn on Susy MC dumper (can be \'True\' or \'False\'')
 
+options.register ('doNoFilter',
+                  False,                                    # default value
+                  opts.VarParsing.multiplicity.singleton,   # singleton or list
+                  opts.VarParsing.varType.bool,
+                  'Turn on no filter requirement, not even requiring 2 leptons! Needed for unfolding at GEN (can be \'True\' or \'False\'')
+
+
 #-------------------------------------------------------------------------------
 # defaults
 options.outputFile = 'latinosYieldSkim.root'
@@ -114,7 +121,7 @@ isVV             = False
 doBorisGenFilter = False
 correctMetPhi    = options.correctMetPhi
 doSusy           = options.doSusy
-
+doNoFilter       = options.doNoFilter
 
 
 labelJetRho = "RECO"
@@ -1006,9 +1013,12 @@ process.outpath    = cms.EndPath(process.out)
 if  doPF2PATAlso:
     process.patPath = cms.Path( process.preYieldFilter + process.prePatSequence * process.patDefaultSequence * process.pfLeptonsOnly * process.postPatSequence )
     process.fakPath = cms.Path( process.preFakeFilter + process.prePatSequence * process.patDefaultSequence * process.pfLeptonsOnly * process.postPatSequence )
+    process.allPath = cms.Path(                         process.prePatSequence * process.patDefaultSequence * process.pfLeptonsOnly * process.postPatSequence )
+
 else:
     process.patPath = cms.Path( process.preYieldFilter + process.prePatSequence * process.patDefaultSequence * process.postPatSequence)
     process.fakPath = cms.Path( process.preFakeFilter + process.prePatSequence * process.patDefaultSequence * process.postPatSequence )
+    process.allPath = cms.Path(                         process.prePatSequence * process.patDefaultSequence * process.postPatSequence )
 
 process.out.SelectEvents   = cms.untracked.PSet(SelectEvents = cms.vstring('patPath'))
 
@@ -1024,7 +1034,11 @@ elif doFakeRates == 'also':
 elif doFakeRates == 'only':
     process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring( 'fakPath' ))
     process.schedule = cms.Schedule( process.fakPath, process.scrap, process.outpath)
-    
+
+if doNoFilter :
+    process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring( 'allPath' ))
+    process.schedule = cms.Schedule( process.patPath, process.allPath, process.scrap, process.outpath)
+
 
 if doTauEmbed == True:
     process.out.outputCommands.extend(
