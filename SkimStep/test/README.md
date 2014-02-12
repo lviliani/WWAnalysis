@@ -1,4 +1,5 @@
-# how to run skim
+How to run skim
+=======
 
     cd src/WWAnalysis/SkimStep/test
     cmsRun latinosYieldSkim.py print inputFiles=file:/data/amassiro/CMSSWRoot/Summer12/WWJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola/28DCA073-84D4-E111-A8D0-F04DA23BCE4C.root isMC=True globalTag=GR_R_52_V7  outputFile=/tmp/amassiro/latinosYieldSkim_MC_WWmg.root   correctMetPhi=False
@@ -8,3 +9,10 @@ to skip any filter at skim level: to be done only for GEN samples needed for unf
 
     cmsRun latinosYieldSkim.py print inputFiles=file:/data/amassiro/CMSSWRoot/Summer12/WWJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola/28DCA073-84D4-E111-A8D0-F04DA23BCE4C.root isMC=True globalTag=GR_R_52_V7  outputFile=/tmp/amassiro/latinosYieldSkim_MC_WWmg.root   correctMetPhi=False    doNoFilter=True
 
+
+
+
+Working examples
+=======
+
+    cmsRun latinosYieldSkim.py print inputFiles=file:/data/amassiro/CMSSWRoot/Summer12/ZllHWWlvlv_private_production/AODSIM-ZHWWlvlv.root    isMC=True globalTag=GR_R_52_V7  outputFile=/tmp/amassiro/latinosYieldSkim_MC_ZHWW.root   correctMetPhi=False
