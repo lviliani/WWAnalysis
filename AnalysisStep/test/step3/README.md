@@ -57,6 +57,15 @@ Details of the options
 Working examples
 =======
 
-    cmsRun step3.py print inputFiles=file:/tmp/amassiro/latinosYieldSkim_MC_ZHWW.root  label=WW id=3125  scale=0.000351494077427652715 outputFile=/tmp/amassiro/step3_latinosYieldSkim_MC_ZHWW.root       doNoFilter=True
+    cmsRun step3.py print inputFiles=file:/tmp/amassiro/latinosYieldSkim_MC_ZHWW.root  label=WW id=3125  scale=0.000351494077427652715 outputFile=/tmp/amassiro/step3_latinosYieldSkim_MC_ZHWW.root
     3.51494077427652715e-04   = 0.412 / (0.412 + 0.704 + 0.128) * (3*0.108 *3*0.108) * (3*0.0337) * 1000 / 10000
+
+    python ucsd2latino.py step3_latinosYieldSkim_MC_ZHWW.root
+
+
+
+
+
+
+
 
