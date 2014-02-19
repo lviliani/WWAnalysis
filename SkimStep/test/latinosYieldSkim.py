@@ -162,7 +162,6 @@ if not isMC:
          connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU"))
          )
 
-
 process.source = cms.Source('PoolSource',fileNames=cms.untracked.vstring( inputFiles ), skipEvents=cms.untracked.uint32( skipEvents ) )
 process.out    = cms.OutputModule("PoolOutputModule", outputCommands =  cms.untracked.vstring(), fileName = cms.untracked.string( outputFile ) )
 
@@ -986,6 +985,7 @@ process.out.outputCommands =  cms.untracked.vstring(
     #'keep *_pfNoPileUp_*_*',
     'keep *_pfInputsCA8_*_*',
     'keep *_selectedPatJetsCA8PF__*',
+    'keep recoGenJets_ak5GenJets*NoNu_*_Yield'
 )
 
 process.prePatSequence  = cms.Sequence( process.preLeptonSequence + process.preElectronSequence + process.preMuonSequence + process.PFTau)
@@ -1036,8 +1036,18 @@ elif doFakeRates == 'only':
     process.schedule = cms.Schedule( process.fakPath, process.scrap, process.outpath)
 
 if doNoFilter :
+    ##Extra GenJets
+    process.load('RecoJets.Configuration.RecoGenJets_cff')
+    process.load('RecoJets.Configuration.GenJetParticles_cff')
+    process.genParticlesForJetsNoElNoMuNoNu = process.genParticlesForJetsNoMuNoNu.clone()
+    process.genParticlesForJetsNoElNoMuNoNu.ignoreParticleIDs += cms.vuint32( 11)
+    process.ak5GenJetsNoElNoMuNoNu = process.ak5GenJetsNoMuNoNu.clone()
+    process.ak5GenJetsNoElNoMuNoNu.src = cms.InputTag("genParticlesForJetsNoElNoMuNoNu")
+    process.extraGenJets = cms.Sequence(process.genParticlesForJetsNoNu+process.ak5GenJetsNoNu+process.genParticlesForJetsNoMuNoNu+process.ak5GenJetsNoMuNoNu+process.genParticlesForJetsNoElNoMuNoNu+process.ak5GenJetsNoElNoMuNoNu)
+    process.allPath += process.extraGenJets
+    #No need to run patPath (with preYieldFilter)
     process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring( 'allPath' ))
-    process.schedule = cms.Schedule( process.patPath, process.allPath, process.scrap, process.outpath)
+    process.schedule = cms.Schedule( process.allPath, process.scrap, process.outpath)
 
 
 if doTauEmbed == True:
