@@ -120,6 +120,18 @@ options.register ('doNoFilter',
                   opts.VarParsing.varType.bool,
                   'Turn on no filter requirement, not even requiring 2 leptons! Needed for unfolding at GEN (can be \'True\' or \'False\'')
 
+options.register ('acceptDuplicates',
+                  False,                                    # default value
+                  opts.VarParsing.multiplicity.singleton,   # singleton or list
+                  opts.VarParsing.varType.bool,
+                  'accept duplicates. Suggested true for private production (can be \'True\' or \'False\'')
+
+options.register ('doFatJet',
+                  False,                                    # default value
+                  opts.VarParsing.multiplicity.singleton,   # singleton or list
+                  opts.VarParsing.varType.bool,
+                  'Turn on Fat (can be \'True\' or \'False\'')
+
 
 #-------------------------------------------------------------------------------
 # defaults
@@ -136,9 +148,20 @@ process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.destinations = ['cout', 'cerr']
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
-process.source = cms.Source('PoolSource',fileNames=cms.untracked.vstring( options.inputFiles ), skipEvents=cms.untracked.uint32( options.skipEvents ) )
+if options.acceptDuplicates :
+    process.source = cms.Source('PoolSource',
+          fileNames  = cms.untracked.vstring( options.inputFiles ),
+          skipEvents = cms.untracked.uint32( options.skipEvents ),
+          duplicateCheckMode  = cms.untracked.string('noDuplicateCheck'),
+          )
+else :
+    process.source = cms.Source('PoolSource',
+          fileNames  = cms.untracked.vstring( options.inputFiles ),
+          skipEvents = cms.untracked.uint32( options.skipEvents ),
+          )
 
 process.source.inputCommands = cms.untracked.vstring( "keep *", "drop *_conditionsInEdm_*_*",  "drop *_MEtoEDMConverter_*_*")
+
 
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(options.summary))
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.maxEvents) )
@@ -469,7 +492,8 @@ for X in "elel", "mumu", "elmu", "muel", "ellell":
 
     addAdditionalJets(process,tree)
 
-    addFatJets(process,tree)
+    if options.doFatJet :
+        addFatJets(process,tree)
 
 
     if dataset[0] == 'MC':
