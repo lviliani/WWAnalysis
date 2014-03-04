@@ -88,6 +88,11 @@ options.register ('doNoFilter',
                   opts.VarParsing.varType.bool,
                   'Turn on no filter requirement, not even requiring 2 leptons! Needed for unfolding at GEN (can be \'True\' or \'False\'')
 
+options.register ('doFatJet',
+                  False,                                    # default value
+                  opts.VarParsing.multiplicity.singleton,   # singleton or list
+                  opts.VarParsing.varType.bool,
+                  'Turn on Fat (can be \'True\' or \'False\'')
 
 #-------------------------------------------------------------------------------
 # defaults
@@ -122,6 +127,7 @@ doBorisGenFilter = False
 correctMetPhi    = options.correctMetPhi
 doSusy           = options.doSusy
 doNoFilter       = options.doNoFilter
+doFatJet         = options.doFatJet
 
 
 labelJetRho = "RECO"
@@ -481,68 +487,72 @@ switchJetCollection(
 
 
 
+if doFatJet :
 
-# for FatJets #
+    # for FatJets #
 
-from RecoJets.JetProducers.ca4PFJets_cfi import ca4PFJets
+    from RecoJets.JetProducers.ca4PFJets_cfi import ca4PFJets
 
-process.ca8PFJetsPFlow = ca4PFJets.clone(
-    rParam = cms.double(0.8),
-    src = cms.InputTag('pfNoPileUp'),
-    doAreaFastjet = cms.bool(True),
-    doRhoFastjet = cms.bool(True),
-    Rho_EtaMax = cms.double(4.4),  ## sure?
-    Ghost_EtaMax = cms.double(5.0)  ## sure?
-  )
+    process.ca8PFJetsPFlow = ca4PFJets.clone(
+        rParam = cms.double(0.8),
+        src = cms.InputTag('pfNoPileUp'),
+        doAreaFastjet = cms.bool(True),
+        doRhoFastjet = cms.bool(True),
+        Rho_EtaMax = cms.double(4.4),  ## sure?
+        Ghost_EtaMax = cms.double(5.0)  ## sure?
+      )
 
-addJetCollection(
-    process,
-    cms.InputTag('ca8PFJetsPFlow'), # Jet collection; must be already in the event when patLayer0 sequence is executed
-    algoLabel     = "CA8",
-    typeLabel     = "PF",
-    doJTA         = True, # Run Jet-Track association & JetCharge
-    doBTagging    = True, # Run b-tagging
-    #jetCorrLabel  = ('AK7PF',myCorrLabels),
-    jetCorrLabel  = ('AK7PF',emptyCorrLabels), # ---> no jet corrections
-    doType1MET    = True,
-    doL1Cleaning  = False,
-    doL1Counters  = False,
-    #genJetCollection = cms.InputTag("ca8GenJetsNoNu"),
-    doJetID       = False
-    )
+    addJetCollection(
+        process,
+        cms.InputTag('ca8PFJetsPFlow'), # Jet collection; must be already in the event when patLayer0 sequence is executed
+        algoLabel     = "CA8",
+        typeLabel     = "PF",
+        doJTA         = True, # Run Jet-Track association & JetCharge
+        doBTagging    = True, # Run b-tagging
+        #jetCorrLabel  = ('AK7PF',myCorrLabels),
+        jetCorrLabel  = ('AK7PF',emptyCorrLabels), # ---> no jet corrections
+        doType1MET    = True,
+        doL1Cleaning  = False,
+        doL1Counters  = False,
+        #genJetCollection = cms.InputTag("ca8GenJetsNoNu"),
+        doJetID       = False
+        )
 
-process.pfInputsCA8 = cms.EDProducer(
-      "CandViewNtpProducer",
-      src = cms.InputTag('selectedPatJetsCA8PF', 'pfCandidates'),
-      lazyParser = cms.untracked.bool(True),
-      eventInfo = cms.untracked.bool(False),
-      variables = cms.VPSet(
-          cms.PSet(
-              tag = cms.untracked.string("px"),
-              quantity = cms.untracked.string("px")
-              ),
-          cms.PSet(
-              tag = cms.untracked.string("py"),
-              quantity = cms.untracked.string("py")
-              ),
-          cms.PSet(
-              tag = cms.untracked.string("pz"),
-              quantity = cms.untracked.string("pz")
-              ),
-          cms.PSet(
-              tag = cms.untracked.string("energy"),
-              quantity = cms.untracked.string("energy")
-              ),
-          cms.PSet(
-              tag = cms.untracked.string("pdgId"),
-              quantity = cms.untracked.string("pdgId")
+    process.pfInputsCA8 = cms.EDProducer(
+          "CandViewNtpProducer",
+          src = cms.InputTag('selectedPatJetsCA8PF', 'pfCandidates'),
+          lazyParser = cms.untracked.bool(True),
+          eventInfo = cms.untracked.bool(False),
+          variables = cms.VPSet(
+              cms.PSet(
+                  tag = cms.untracked.string("px"),
+                  quantity = cms.untracked.string("px")
+                  ),
+              cms.PSet(
+                  tag = cms.untracked.string("py"),
+                  quantity = cms.untracked.string("py")
+                  ),
+              cms.PSet(
+                  tag = cms.untracked.string("pz"),
+                  quantity = cms.untracked.string("pz")
+                  ),
+              cms.PSet(
+                  tag = cms.untracked.string("energy"),
+                  quantity = cms.untracked.string("energy")
+                  ),
+              cms.PSet(
+                  tag = cms.untracked.string("pdgId"),
+                  quantity = cms.untracked.string("pdgId")
+                  )
               )
-          )
-  )
+      )
 
-# add to the sequence
-process.preLeptonSequence.replace( process.pfNoPileUp, process.pfNoPileUp*process.ca8PFJetsPFlow )
-process.patDefaultSequence.replace (process.selectedPatJetsCA8PF, process.selectedPatJetsCA8PF*process.pfInputsCA8)
+    # add to the sequence
+    process.preLeptonSequence.replace( process.pfNoPileUp, process.pfNoPileUp*process.ca8PFJetsPFlow )
+    process.patDefaultSequence.replace (process.selectedPatJetsCA8PF, process.selectedPatJetsCA8PF*process.pfInputsCA8)
+
+
+
 
 
 
