@@ -87,7 +87,10 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     }
 
     edm::Handle<pat::JetCollection> fatJetH;
-    iEvent.getByLabel(fatJetTag_,fatJetH);
+    try {
+     iEvent.getByLabel(fatJetTag_,fatJetH);
+    }
+    catch (int e){}
 
     edm::Handle<pat::JetCollection> jetH;
     iEvent.getByLabel(jetTag_,jetH);
@@ -223,7 +226,7 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
                 // Everything else
                  skimEvent->back().setTriggerBits(passBits);
                  skimEvent->back().setJets(jetH);
-                 if (fatJetH.failedToGet()) {
+                 if (!fatJetH.failedToGet()) {
                   skimEvent->back().setFatJets(fatJetH);
                  }
                  skimEvent->back().setJetRhoIso(rhoJetIso);
@@ -299,7 +302,7 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
                 // Everything else
         skimEvent->back().setTriggerBits(passBits);
         skimEvent->back().setJets(jetH);
-        if (fatJetH.failedToGet()) {
+        if (!fatJetH.failedToGet()) {
          skimEvent->back().setFatJets(fatJetH);
         }
         skimEvent->back().setJetRhoIso(rhoJetIso);
@@ -371,7 +374,7 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
                 // Everything else
                 skimEvent->back().setTriggerBits(passBits);
                 skimEvent->back().setJets(jetH);
-                if (fatJetH.failedToGet()) {
+                if (!fatJetH.failedToGet()) {
                  skimEvent->back().setFatJets(fatJetH);
                 }
                 skimEvent->back().setJetRhoIso(rhoJetIso);
@@ -444,7 +447,7 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
                 // Everything else
                 skimEvent->back().setTriggerBits(passBits);
                 skimEvent->back().setJets(jetH);
-                if (fatJetH.failedToGet()) {
+                if (!fatJetH.failedToGet()) {
                  skimEvent->back().setFatJets(fatJetH);
                 }
                 skimEvent->back().setJetRhoIso(rhoJetIso);
@@ -511,7 +514,7 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
          // Everything else
        skimEvent->back().setTriggerBits(passBits);
        skimEvent->back().setJets(jetH);
-       if (fatJetH.failedToGet()) {
+       if (!fatJetH.failedToGet()) {
         skimEvent->back().setFatJets(fatJetH);
        }
        skimEvent->back().setJetRhoIso(rhoJetIso);
@@ -567,7 +570,7 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
          // Everything else
          skimEvent->back().setTriggerBits(passBits);
          skimEvent->back().setJets(jetH);
-         if (fatJetH.failedToGet()) {
+         if (!fatJetH.failedToGet()) {
           skimEvent->back().setFatJets(fatJetH);
          }
          skimEvent->back().setJetRhoIso(rhoJetIso);
@@ -618,7 +621,7 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
          // Everything else
           skimEvent->back().setTriggerBits(passBits);
           skimEvent->back().setJets(jetH);
-          if (fatJetH.failedToGet()) {
+          if (!fatJetH.failedToGet()) {
            skimEvent->back().setFatJets(fatJetH);
           }
           skimEvent->back().setJetRhoIso(rhoJetIso);
