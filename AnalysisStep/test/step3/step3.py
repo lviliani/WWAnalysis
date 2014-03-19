@@ -114,6 +114,13 @@ options.register ('doGen',
                        opts.VarParsing.varType.bool,
                        'Turn on gen Variables dumper (can be \'True\' or \'False\'')
 
+options.register ('doGenVV',
+                       False,                                    # default value
+                       opts.VarParsing.multiplicity.singleton,   # singleton or list
+                       opts.VarParsing.varType.bool,
+                       'Turn on gen truth Variables dumper (can be \'True\' or \'False\'')
+
+
 options.register ('doNoFilter',
                   False,                                    # default value
                   opts.VarParsing.multiplicity.singleton,   # singleton or list
@@ -283,6 +290,7 @@ def addMuVars( s3 ):
 
 doLHE            = options.doLHE
 doGen            = options.doGen
+doGenVV          = options.doGenVV
 doHiggs          = options.doHiggs
 doSusy           = options.doSusy
 doTauEmbed       = options.doTauEmbed
@@ -316,6 +324,7 @@ if label in  [ 'SingleElectron', 'DoubleElectron', 'SingleMuon', 'DoubleMuon', '
     scalef  = 1
     doPDFvar = False
     doGen = false
+    doGenVV = false
     doLHE = false
 
 
@@ -326,6 +335,7 @@ elif doTauEmbed == True:
     scalef  = 1
     doPDFvar = False
     doGen = false
+    doGenVV = false
     doLHE = false
 
 
@@ -347,6 +357,7 @@ else:
     t = re.match("SMH125*", label)
     doPDFvar = True
     doGen = True
+    doGenVV = True
     if m:
         mhiggs = int(m.group(1))
         fourthGenSF = fourthGenScales[int(m.group(1))]
@@ -446,6 +457,11 @@ for X in "elel", "mumu", "elmu", "muel":
         getattr(process,"ww%s%s"% (X,label)).genMetTag = "genMetTrue"
 	getattr(process,"ww%s%s"% (X,label)).genJetTag = cms.InputTag("selectedPatJets","genJets","Yield")
 
+    if doGenVV == True :
+        getattr(process,"ww%s%s"% (X,label)).genParticlesTag = "prunedGen"
+        getattr(process,"ww%s%s"% (X,label)).genMetTag = "genMetTrue"
+        getattr(process,"ww%s%s"% (X,label)).genJetTag = cms.InputTag("ak5GenJetsNoElNoMuNoNu","","Yield")
+
     if id in ["036", "037", "037c0", "037c1", "037c2", "037c3", "037c4", "037c5", "037c6", "037c7", "037c8", "037c9", "042", "043", "045", "046" ]: # DY-Madgraph sample
         getattr(process,"ww%s%s"% (X,label)).genParticlesTag = "prunedGen"
 
@@ -490,6 +506,9 @@ for X in "elel", "mumu", "elmu", "muel", "ellell":
      tree.variables.HEPMCweightFac6 = cms.string("HEPMCweightFac(6)")
 
     if doGen: addGenVariables(process,tree)
+
+    if doGenVV: addGenVVVariables(process,tree)
+
 
     addAdditionalJets(process,tree)
 

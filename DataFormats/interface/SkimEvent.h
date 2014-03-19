@@ -391,6 +391,26 @@ namespace reco {
             const float leadingGenJetEta(size_t a) const;
             const float leadingGenJetPhi(size_t a) const;
 
+	    const float genVVLeptonPt(size_t a, bool incS1 = false) const;
+	    const float genVVLeptonPID(size_t a, bool incS1 = false) const;
+	    const float genVVLeptonPhi(size_t a, bool incS1 = false) const;
+	    const float genVVLeptonEta(size_t a, bool incS1 = false) const;
+	    const float genVVLeptonimTau(size_t a, bool incS1 = false) const;
+	    const float genVVLeptonoVPID(size_t a, bool incS1 = false) const;
+	    const float genVVIncS1LeptonPt(size_t a) const;
+	    const float genVVIncS1LeptonPID(size_t a) const;
+	    const float genVVIncS1LeptonPhi(size_t a) const;
+	    const float genVVIncS1LeptonEta(size_t a) const;
+	    const float genVVIncS1LeptonimTau(size_t a) const;
+	    const float genVVIncS1LeptonoVPID(size_t a) const;
+
+	    const float genVVNeutrinoPt(size_t a) const;
+	    const float genVVNeutrinoPID(size_t a) const;
+	    const float genVVNeutrinoPhi(size_t a) const;
+	    const float genVVNeutrinoEta(size_t a) const;
+	    const float genVVNeutrinoimTau(size_t a) const;
+	    const float genVVNeutrinooVPID(size_t a) const;
+
             const float genMetPt() const;
 	    const float genMetPhi() const;
 	    const float genMetEta() const;
