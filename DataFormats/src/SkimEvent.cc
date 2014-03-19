@@ -3954,7 +3954,7 @@ const float reco::SkimEvent::genVVLeptonPt(size_t a, bool incS1) const {
       while (curr->mother()) {
 	curr = curr->mother();
 	int pdg = abs(curr->pdgId());
-	if (pdg == 22 || pdg == 24) {
+	if (pdg == 23 || pdg == 24) {
 	  v_parent = true;
 	  break;
 	}
@@ -4060,8 +4060,8 @@ const float reco::SkimEvent::genVVLeptonoVPID(size_t a, bool incS1) const {
      const reco::Candidate* curr = mcH;
      while (curr->mother()) {
        curr = curr->mother();
-       int vpid = curr->pdgId();
-       if (vpid == 22 || vpid == 24 || vpid == -24) oVPID = vpid;
+       int pdg = curr->pdgId();
+       if (abs(pdg) == 23 || abs(pdg) == 24) oVPID = pdg;
      }
    }
  } // loop over gen particles
@@ -4092,7 +4092,7 @@ const float reco::SkimEvent::genVVNeutrinoPt(size_t a) const {
       while (curr->mother()) {
 	curr = curr->mother();
 	int pdg = abs(curr->pdgId());
-	if (pdg == 22 || pdg == 24) {
+	if (pdg == 23 || pdg == 24) {
 	  v_parent = true;
 	  break;
 	}
@@ -4197,8 +4197,8 @@ const float reco::SkimEvent::genVVNeutrinooVPID(size_t a) const {
      const reco::Candidate* curr = mcH;
      while (curr->mother()) {
        curr = curr->mother();
-       int vpid = curr->pdgId();
-       if (vpid == 22 || vpid == 24 || vpid == -24) oVPID = vpid;
+       int pdg = curr->pdgId();
+       if (abs(pdg) == 23 || abs(pdg) == 24) oVPID = pdg;
      }
    }
  } // loop over gen particles

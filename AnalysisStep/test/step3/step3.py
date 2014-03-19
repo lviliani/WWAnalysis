@@ -356,8 +356,6 @@ else:
     s = re.match("Higgs0M*", label)
     t = re.match("SMH125*", label)
     doPDFvar = True
-    doGen = True
-    doGenVV = True
     if m:
         mhiggs = int(m.group(1))
         fourthGenSF = fourthGenScales[int(m.group(1))]
