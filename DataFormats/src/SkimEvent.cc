@@ -3191,7 +3191,7 @@ const float reco::SkimEvent::getHiggsMass() const {
 //   std::cout << " getSusyMass1 " << std::endl;
  float mass = -1;
 
- const reco::Candidate* mcH = 0;
+//  const reco::Candidate* mcH = 0;
 
   // loop over gen particles
  for(size_t gp=0; gp<genParticles_.size();++gp){
@@ -3201,8 +3201,9 @@ const float reco::SkimEvent::getHiggsMass() const {
    
     // Stop {1000006}
   if( (pdgId == 25) && (status == 3) ) {
-   mcH = &(*(genParticles_[gp]));
-   mass = mcH->mass();
+//    mcH = &(*(genParticles_[gp]));
+//    mass = mcH->mass();
+   mass = (&(*(genParticles_[gp])))->mass();
   }
  } // loop over gen particles
 
@@ -3216,7 +3217,7 @@ const float reco::SkimEvent::getHiggsPt() const {
 //   std::cout << " getSusyMass1 " << std::endl;
  float pt = -1;
 
- const reco::Candidate* mcH = 0;
+//  const reco::Candidate* mcH = 0;
 
   // loop over gen particles
  for(size_t gp=0; gp<genParticles_.size();++gp){
@@ -3226,8 +3227,9 @@ const float reco::SkimEvent::getHiggsPt() const {
    
     // Stop {1000006}
   if( (pdgId == 25) && (status == 3) ) {
-   mcH = &(*(genParticles_[gp]));
-   pt = mcH->pt();
+//    mcH = &(*(genParticles_[gp]));
+//    pt = mcH->pt();
+   pt = (&(*(genParticles_[gp])))->pt();
   }
  } // loop over gen particles
 
