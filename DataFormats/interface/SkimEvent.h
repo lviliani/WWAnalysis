@@ -147,6 +147,7 @@ namespace reco {
             void FindDaughterParticles(const reco::Candidate** pCurrent, std::vector<const reco::Candidate*>* pFinal = 0) const;
             const float getFinalStateMC() const;
             const float getWWdecayMC() const;
+	    const float getWZdecayMC() const;
             const float mcHiggsProd() const;
 
             const float HEPMCweight() const ;
@@ -158,6 +159,8 @@ namespace reco {
             const float getHiggsPt() const;
             const float getSusyStopMass() const;
             const float getSusyLSPMass() const;
+	    const float getZPt() const;
+	    const float getZMass() const;
 
             const float getPDFscalePDF() const;
             const float getPDFx1() const;
