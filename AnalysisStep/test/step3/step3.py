@@ -553,6 +553,11 @@ for X in "elel", "mumu", "elmu", "muel", "ellell":
         if id in ["036", "037", "037c0", "037c1", "037c2", "037c3", "037c4", "037c5", "037c6", "037c7", "037c8", "037c9", "042", "043", "045", "046" ]: # DY-Madgraph sample
             tree.variables.mctruth = cms.string("getFinalStateMC()")
 
+    if id in ["077", "078", "074" ]: 
+	tree.variables.PtZ = cms.string("getZPt()")
+	tree.variables.MZ = cms.string("getZMass()")
+	tree.variables.WZchan = cms.string("getWZdecayMC()")
+
     if doTauEmbed == True:
         tree.variables.mctruth = cms.string("mcGenWeight()")
 

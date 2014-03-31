@@ -2911,6 +2911,151 @@ const float reco::SkimEvent::getFinalStateMC() const {
 
 
 
+//WZ
+const float reco::SkimEvent::getWZdecayMC() const {
+
+//   std::cout << " getFinalStateMC " << std::endl;
+  float finalState = -1;
+  // 3 = mmm
+  // 1 = eem
+  // 0 = eee
+  // 2 = mme
+
+ const reco::Candidate* mcW=0;
+ const reco::Candidate* mcZ=0;
+ // loop over gen particles
+  for(size_t gp=0; gp<genParticles_.size();++gp){
+    int pdgId  = genParticles_[gp] -> pdgId();
+    int status = genParticles_[gp] -> status();
+//if(status==3) std::cout<<pdgId<<" ";
+    if( (abs(pdgId) == 23) && (status == 3) ) 
+      mcZ = &(*(genParticles_[gp]));
+
+    if( (abs(pdgId) == 24) && (status == 3) ) 
+	mcW = &(*(genParticles_[gp]));
+ } // loop over gen particles
+
+	if ((mcZ==0 )) {
+  for(size_t gp=0; gp<genParticles_.size();++gp){
+    int pdgId  = genParticles_[gp] -> pdgId();
+    int status = genParticles_[gp] -> status();
+//	if (status==3) std::cout << pdgId << " " << status << std::endl;
+	if ( (abs(pdgId) == 24) && (status == 3)) {mcZ = &(*(genParticles_[gp]));continue;}
+}
+}	
+	if(mcZ!=0 && mcW !=0){
+    const reco::Candidate* mcF1_fromV1=0;
+    const reco::Candidate* mcF2_fromV1=0;
+    const reco::Candidate* mcF1_fromV2=0;
+    const reco::Candidate* mcF2_fromV2=0;
+
+
+    bool isWZok = true;
+    std::vector<const reco::Candidate*> fFromV1Buffer,fFromV1Buffer1,fFromV1Buffer2;
+    FindDaughterParticles(&mcW,&fFromV1Buffer);
+    if(fFromV1Buffer.size() == 2) {
+     mcF1_fromV1 = fFromV1Buffer.at(0);
+     mcF2_fromV1 = fFromV1Buffer.at(1);
+
+     if(abs(mcF1_fromV1 -> pdgId()) == 15) {
+      FindDaughterParticles(&mcF1_fromV1,&fFromV1Buffer1);
+	if(fFromV1Buffer1.size() == 3) {
+	if(abs((fFromV1Buffer1.at(0))-> pdgId()) == 11 || abs((fFromV1Buffer1.at(0))-> pdgId()) == 13) mcF1_fromV1 = fFromV1Buffer1.at(0);
+        else if(abs((fFromV1Buffer1.at(1))-> pdgId()) == 11 || abs((fFromV1Buffer1.at(1))-> pdgId()) == 13) mcF1_fromV1 = fFromV1Buffer1.at(1);
+	else if(abs((fFromV1Buffer1.at(2))-> pdgId()) == 11 || abs((fFromV1Buffer1.at(2))-> pdgId()) == 13) mcF1_fromV1 = fFromV1Buffer1.at(2);
+	}
+     }
+     else if(abs(mcF2_fromV1 -> pdgId()) == 15) {
+      FindDaughterParticles(&mcF2_fromV1,&fFromV1Buffer2);
+	if(fFromV1Buffer2.size() == 3) {
+        if(abs((fFromV1Buffer2.at(0))-> pdgId()) == 11 || abs((fFromV1Buffer2.at(0))-> pdgId()) == 13) mcF2_fromV1 = fFromV1Buffer2.at(0);
+        else if(abs((fFromV1Buffer2.at(1))-> pdgId()) == 11 || abs((fFromV1Buffer2.at(1))-> pdgId()) == 13) mcF2_fromV1 = fFromV1Buffer2.at(1);
+        else if(abs((fFromV1Buffer2.at(2))-> pdgId()) == 11 || abs((fFromV1Buffer2.at(2))-> pdgId()) == 13) mcF2_fromV1 = fFromV1Buffer2.at(2);
+	}
+     }
+    }
+    else {
+     isWZok  = false;
+    }
+
+    std::vector<const reco::Candidate*> fFromV2Buffer,fFromV2Buffer1,fFromV2Buffer2;
+    FindDaughterParticles(&mcZ,&fFromV2Buffer);
+    if(fFromV2Buffer.size() == 2) {
+     mcF1_fromV2 = fFromV2Buffer.at(0);
+     mcF2_fromV2 = fFromV2Buffer.at(1);
+
+     if(abs(mcF1_fromV2 -> pdgId()) == 15) {
+      FindDaughterParticles(&mcF1_fromV2,&fFromV2Buffer1);
+	if(fFromV2Buffer1.size() == 3) {
+	if(abs((fFromV2Buffer1.at(0))-> pdgId()) == 11 || abs((fFromV2Buffer1.at(0))-> pdgId()) == 13) mcF1_fromV2 = fFromV2Buffer1.at(0);
+	else if(abs((fFromV2Buffer1.at(1))-> pdgId()) == 11 || abs((fFromV2Buffer1.at(1))-> pdgId()) == 13) mcF1_fromV2 = fFromV2Buffer1.at(1);
+	else if(abs((fFromV2Buffer1.at(2))-> pdgId()) == 11 || abs((fFromV2Buffer1.at(2))-> pdgId()) == 13) mcF1_fromV2 = fFromV2Buffer1.at(2);
+	}
+     }
+     if(abs(mcF2_fromV2 -> pdgId()) == 15) {
+      FindDaughterParticles(&mcF2_fromV2,&fFromV2Buffer2);
+	if(fFromV2Buffer2.size() == 3) {
+	if(abs((fFromV2Buffer2.at(0))-> pdgId()) == 11 || abs((fFromV2Buffer2.at(0))-> pdgId()) == 13) mcF2_fromV2 = fFromV2Buffer2.at(0);
+        else if(abs((fFromV2Buffer2.at(1))-> pdgId()) == 11 || abs((fFromV2Buffer2.at(1))-> pdgId()) == 13) mcF2_fromV2 = fFromV2Buffer2.at(1);
+	else if(abs((fFromV2Buffer2.at(2))-> pdgId()) == 11 || abs((fFromV2Buffer2.at(2))-> pdgId()) == 13) mcF2_fromV2 = fFromV2Buffer2.at(2);
+	}
+     }
+    }
+    else {
+     isWZok  = false;
+    }
+
+
+if (isWZok) {
+
+     // mmm
+     if ( (abs(mcF1_fromV1 -> pdgId()) == 13 || abs(mcF2_fromV1 -> pdgId()) == 13) && (abs(mcF1_fromV2 -> pdgId()) == 13 && abs(mcF2_fromV2 -> pdgId()) == 13) ) 
+      finalState = 3;
+     
+     // mme
+     else if ( (abs(mcF1_fromV1 -> pdgId()) == 11 || abs(mcF2_fromV1 -> pdgId()) == 11) && (abs(mcF1_fromV2 -> pdgId()) == 13 && abs(mcF2_fromV2 -> pdgId()) == 13) )
+      finalState = 2;
+
+     // eee
+     else if ( (abs(mcF1_fromV1 -> pdgId()) == 11 || abs(mcF2_fromV1 -> pdgId()) == 11) && (abs(mcF1_fromV2 -> pdgId()) == 11 && abs(mcF2_fromV2 -> pdgId()) == 11) ) 
+      finalState = 0;
+     
+     // eem
+     else if ( (abs(mcF1_fromV1 -> pdgId()) == 13 || abs(mcF2_fromV1 -> pdgId()) == 13) && (abs(mcF1_fromV2 -> pdgId()) == 11 && abs(mcF2_fromV2 -> pdgId()) == 11) )
+      finalState = 1;
+/*
+     // ttt
+     else if ( (abs(mcF1_fromV1 -> pdgId()) == 15|| abs(mcF1_fromV1 -> pdgId()) == 16) && (abs(mcF1_fromV2 -> pdgId()) == 15|| abs(mcF1_fromV2 -> pdgId()) == 15) )
+      finalState = 4;
+
+     // ttm
+     else if ( (abs(mcF1_fromV1 -> pdgId()) == 13 || abs(mcF1_fromV1 -> pdgId()) == 14) && (abs(mcF1_fromV2 -> pdgId()) == 15|| abs(mcF1_fromV2 -> pdgId()) == 15) )
+      finalState = 5;
+
+     // mmt
+     else if ( (abs(mcF1_fromV1 -> pdgId()) == 15 || abs(mcF1_fromV1 -> pdgId()) == 16) && (abs(mcF1_fromV2 -> pdgId()) == 13|| abs(mcF1_fromV2 -> pdgId()) == 13) )
+      finalState = 6;
+
+     // tte
+     else if ( (abs(mcF1_fromV1 -> pdgId()) == 11 || abs(mcF1_fromV1 -> pdgId()) == 12) && (abs(mcF1_fromV2 -> pdgId()) == 15|| abs(mcF1_fromV2 -> pdgId()) == 15) )
+      finalState = 7;
+
+     // eet
+     else if ( (abs(mcF1_fromV1 -> pdgId()) == 15 || abs(mcF1_fromV1 -> pdgId()) == 16) && (abs(mcF1_fromV2 -> pdgId()) == 11 || abs(mcF1_fromV2 -> pdgId()) == 11) )
+      finalState = 8;*/
+	else finalState = 4;
+}
+    else {
+     finalState = -2;
+    }
+}
+return finalState;
+
+}
+
+
+
+
 //---- H > WW > lvlv : WW decay final state
 
 const float reco::SkimEvent::getWWdecayMC() const {
@@ -3209,6 +3354,52 @@ const float reco::SkimEvent::getHiggsMass() const {
  return mass;
 }
 
+
+const float reco::SkimEvent::getZPt() const {
+
+//   std::cout << " getSusyMass1 " << std::endl;
+ float pt = -1;
+
+ const reco::Candidate* mcH = 0;
+
+  // loop over gen particles
+ for(size_t gp=0; gp<genParticles_.size();++gp){
+
+  int pdgId  = genParticles_[gp] -> pdgId();
+  int status = genParticles_[gp] -> status();
+
+    // Stop {1000006}
+  if( (pdgId == 23) && (status == 3) ) {
+   mcH = &(*(genParticles_[gp]));
+   pt = mcH->pt();
+  }
+ } // loop over gen particles
+
+ return pt;
+}
+
+const float reco::SkimEvent::getZMass() const {
+
+//   std::cout << " getSusyMass1 " << std::endl;
+ float pt = -1;
+
+ const reco::Candidate* mcH = 0;
+
+  // loop over gen particles
+ for(size_t gp=0; gp<genParticles_.size();++gp){
+
+  int pdgId  = genParticles_[gp] -> pdgId();
+  int status = genParticles_[gp] -> status();
+
+    // Stop {1000006}
+  if( (pdgId == 23) && (status == 3) ) {
+   mcH = &(*(genParticles_[gp]));
+   pt = mcH->mass();
+  }
+ } // loop over gen particles
+
+ return pt;
+}
 
 
 const float reco::SkimEvent::getHiggsPt() const {
