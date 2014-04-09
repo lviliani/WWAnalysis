@@ -651,6 +651,19 @@ def addGenVVVariables(process,pt):
         setattr(pt.variables, "genVV_S1lepton3_imTau"   , cms.string("genVVS1LeptonimTau(2)")),
         setattr(pt.variables, "genVV_S1lepton3_oVpid"   , cms.string("genVVS1LeptonoVPID(2)")),
 
+        setattr(pt.variables, "genVV_lepton1_LHE_pt"  , cms.string("leadingLHELeptonPt(0)")),
+        setattr(pt.variables, "genVV_lepton1_LHE_pid"  , cms.string("leadingLHELeptonPID(0)")),
+        setattr(pt.variables, "genVV_lepton1_LHE_phi"  , cms.string("leadingLHELeptonPhi(0)")),
+        setattr(pt.variables, "genVV_lepton1_LHE_eta"  , cms.string("leadingLHELeptonEta(0)")),
+        setattr(pt.variables, "genVV_lepton2_LHE_pt"  , cms.string("leadingLHELeptonPt(1)")),
+        setattr(pt.variables, "genVV_lepton2_LHE_pid"  , cms.string("leadingLHELeptonPID(1)")),
+        setattr(pt.variables, "genVV_lepton2_LHE_phi"  , cms.string("leadingLHELeptonPhi(1)")),
+        setattr(pt.variables, "genVV_lepton2_LHE_eta"  , cms.string("leadingLHELeptonEta(1)")),
+        setattr(pt.variables, "genVV_lepton3_LHE_pt"  , cms.string("leadingLHELeptonPt(2)")),
+        setattr(pt.variables, "genVV_lepton3_LHE_pid"  , cms.string("leadingLHELeptonPID(2)")),
+        setattr(pt.variables, "genVV_lepton3_LHE_phi"  , cms.string("leadingLHELeptonPhi(2)")),
+        setattr(pt.variables, "genVV_lepton3_LHE_eta"  , cms.string("leadingLHELeptonEta(2)")),
+
         setattr(pt.variables, "genVV_neutrino1_pt"    , cms.string("genVVNeutrinoPt(0)")),
         setattr(pt.variables, "genVV_neutrino1_pid"   , cms.string("genVVNeutrinoPID(0)")),
         setattr(pt.variables, "genVV_neutrino1_phi"   , cms.string("genVVNeutrinoPhi(0)")),
@@ -670,6 +683,18 @@ def addGenVVVariables(process,pt):
         setattr(pt.variables, "genVV_neutrino3_imTau"   , cms.string("genVVNeutrinoimTau(2)")),
         setattr(pt.variables, "genVV_neutrino3_oVpid"   , cms.string("genVVNeutrinooVPID(2)")),
 
+        setattr(pt.variables, "genVV_neutrino1_LHE_pt"   , cms.string("leadingLHENeutrinoPt(0)")),
+        setattr(pt.variables, "genVV_neutrino1_LHE_pid"  , cms.string("leadingLHENeutrinoPID(0)")),
+        setattr(pt.variables, "genVV_neutrino1_LHE_phi"  , cms.string("leadingLHENeutrinoPhi(0)")),
+        setattr(pt.variables, "genVV_neutrino1_LHE_eta"  , cms.string("leadingLHENeutrinoEta(0)")),
+        setattr(pt.variables, "genVV_neutrino2_LHE_pt"   , cms.string("leadingLHENeutrinoPt(1)")),
+        setattr(pt.variables, "genVV_neutrino2_LHE_pid"  , cms.string("leadingLHENeutrinoPID(1)")),
+        setattr(pt.variables, "genVV_neutrino2_LHE_phi"  , cms.string("leadingLHENeutrinoPhi(1)")),
+        setattr(pt.variables, "genVV_neutrino2_LHE_eta"  , cms.string("leadingLHENeutrinoEta(1)")),
+        setattr(pt.variables, "genVV_neutrino3_LHE_pt"   , cms.string("leadingLHENeutrinoPt(2)")),
+        setattr(pt.variables, "genVV_neutrino3_LHE_pid"  , cms.string("leadingLHENeutrinoPID(2)")),
+        setattr(pt.variables, "genVV_neutrino3_LHE_phi"  , cms.string("leadingLHENeutrinoPhi(2)")),
+        setattr(pt.variables, "genVV_neutrino3_LHE_eta"  , cms.string("leadingLHENeutrinoEta(2)")),
 
         setattr(pt.variables, "higggsGenpt" , cms.string("getHiggsPt()")),
 
