@@ -584,7 +584,11 @@ def addGenVariables(process,pt):
         setattr(pt.variables, "jetGenpt3"    , cms.string("leadingGenJetPt(2)")),
         setattr(pt.variables, "jetGenphi3"   , cms.string("leadingGenJetPhi(2)")),
         setattr(pt.variables, "jetGeneta3"   , cms.string("leadingGenJetEta(2)")),
+        setattr(pt.variables, "jetGenpt4"    , cms.string("leadingGenJetPt(3)")),
+        setattr(pt.variables, "jetGenphi4"   , cms.string("leadingGenJetPhi(3)")),
+        setattr(pt.variables, "jetGeneta4"   , cms.string("leadingGenJetEta(3)")),
 
+        setattr(pt.variables, "ngenjet"   , cms.string("nCentralGenJets("+CJVminPt+","+CJVmaxEta+")")),
 
     else:
         raise addGenVariables, "In addGenVariables, %s doesn't look like a ProbeTreeProducer object, it has no 'variables' attribute." % pt

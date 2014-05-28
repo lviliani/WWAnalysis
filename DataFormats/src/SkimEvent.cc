@@ -3881,6 +3881,8 @@ const float reco::SkimEvent::higgsLHEPt() const {
  return -9999.9;  //if no Higgs was found
 }
 
+
+
 const float reco::SkimEvent::leadingGenJetPartonPt(size_t index) const {
  std::vector<float> v_jets_pt ;
 
@@ -4471,6 +4473,18 @@ const float reco::SkimEvent::leadingGenJetEta(size_t index) const {
  return eta;
 }
 
+
+const int reco::SkimEvent::nCentralGenJets(float minPt,float eta) const {
+
+ int count = 0;
+ // loop over particles in the event
+ for (unsigned int  iPart = 0 ; iPart < genJets_.size (); ++iPart) {
+  if ( abs(genJets_[iPart]->eta()) >  eta  ) continue ;
+  if (     genJets_[iPart]->pt()   <= minPt) continue ;
+  count++;
+ }
+ return count;
+}
 
 
 const int reco::SkimEvent::numberOfbQuarks() const {
