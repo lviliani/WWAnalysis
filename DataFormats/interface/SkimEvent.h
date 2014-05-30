@@ -393,6 +393,7 @@ namespace reco {
             const float leadingGenJetPt(size_t a) const;
             const float leadingGenJetEta(size_t a) const;
             const float leadingGenJetPhi(size_t a) const;
+            const int   nCentralGenJets(float minPt,float eta) const;
 
 	    const float genVVLeptonPt(size_t a, bool onlyS1 = false) const;
 	    const float genVVLeptonPID(size_t a, bool onlyS1 = false) const;
