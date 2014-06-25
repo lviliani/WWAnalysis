@@ -50,8 +50,6 @@ namespace
     edm::Wrapper<edm::ValueMap<StoredPileupJetIdentifier> > DummyStoredPileupJetIdentifier ; 
     std::vector<StoredPileupJetIdentifier> vectorDummyStoredPileupJetIdentifier ;
 
-    std::vector<std::pair<unsigned int,int> > dummyvector;
-    std::map<unsigned int,std::vector<std::pair<unsigned int,int> > > dummymap;
 
 //     SimpleJetCorrector dummy9;
 //     FactorizedJetCorrector dummy10;
@@ -80,6 +78,8 @@ namespace
 //   <class name="edm::Wrapper<std::vector<FactorizedJetCorrector::VarTypes> >"/>
 //   <class name="edm::Wrapper<std::vector<std::vector<FactorizedJetCorrector::VarTypes> > >"/>
 
+
+    std::map<unsigned int,std::vector<std::pair<unsigned int,int> > > test;
 
   };
 }
