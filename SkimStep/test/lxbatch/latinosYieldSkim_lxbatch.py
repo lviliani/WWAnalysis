@@ -176,9 +176,8 @@ if not isMC:
 
 process.source = cms.Source('PoolSource',
 
-    fileNames = cms.untracked.vstring([LISTOFFILES])
-
- ), skipEvents=cms.untracked.uint32( skipEvents ) )
+    fileNames = cms.untracked.vstring([LISTOFFILES]),
+    skipEvents=cms.untracked.uint32( skipEvents ) )
 process.out    = cms.OutputModule("PoolOutputModule", outputCommands =  cms.untracked.vstring(), fileName = cms.untracked.string( "OUTPUTFILENAME.root" ) )
 
 process.source.duplicateCheckMode  = cms.untracked.string('noDuplicateCheck')
