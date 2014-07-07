@@ -69,6 +69,8 @@ const reco::GenParticle *reco::SkimEvent::genParticle(size_t i) const {
 
 const reco::GenParticleRef reco::SkimEvent::getMotherID(size_t i) const {
 
+    if(i >= leps_.size()) return reco::GenParticleRef();
+
     const reco::GenParticle *match = isMuon(i) ? getMuon(i)->genLepton() : getElectron(i)->genLepton();
 
     if( !match )                    return reco::GenParticleRef();
@@ -225,6 +227,7 @@ const float reco::SkimEvent::HEPMCweightFac(size_t i) const {
 void reco::SkimEvent::setLepton(const edm::Handle<edm::View<reco::RecoCandidate> > &h,size_t i){
   //std::cout << "setting lepton with collection ID: " << h->ptrAt(i).id() << std::endl;
   leps_.push_back( h->ptrAt(i) );
+//   std::cout << " >> leps_ = " << leps_.size() << std::endl;
 }
 
 void reco::SkimEvent::setExtraLepton(const edm::Handle<edm::View<reco::RecoCandidate> > &h,size_t i){
@@ -308,6 +311,10 @@ void reco::SkimEvent::setChargedMet(const reco::PFMET & chMET) {
 
 void reco::SkimEvent::setGenMet(const edm::Handle<reco::GenMETCollection> & mH) {
     genMet_ = reco::GenMETRef(mH,0);
+}
+
+void reco::SkimEvent::setPFMetTypeI(const edm::Handle<reco::PFMETCollection> & mH) {
+ pfMetTypeI_ = reco::PFMETRef(mH,0);
 }
 
 
@@ -439,7 +446,10 @@ const int reco::SkimEvent::passCustom(size_t i, const std::string &muStr, const 
 const float reco::SkimEvent::leptBdt(size_t i) const {
   if(i >= leps_.size()) return -9999.0;
   if( isElectron(i) ) return getElectron(i)->userFloat("bdttrig"); // changed from "bdt" to "bdttrig"
+//   else                return 999999.;
+  if( isMuon(i) )     return getMuon(i)->userFloat("bdtisonontrigDZ");
   else                return 999999.;
+  
 }
 
 const float reco::SkimEvent::leptLH(size_t i) const {
@@ -616,8 +626,9 @@ const float reco::SkimEvent::dPhiJetll(size_t leadingIndex,float minPt,float eta
             break;
         }
     }
-    return fabs(ROOT::Math::VectorUtil::DeltaPhi(leps_[0]->p4() + leps_[1]->p4(), jets_[newIndex]->p4()) );   
 
+    if(leps_.size() < 2) return -9999.0;
+    return fabs(ROOT::Math::VectorUtil::DeltaPhi(leps_[0]->p4() + leps_[1]->p4(), jets_[newIndex]->p4()) );   
 }
 
 const pat::Jet* reco::SkimEvent::leadingJet(size_t index, float minPt,float eta,int applyCorrection,int applyID) const {
@@ -1164,6 +1175,8 @@ const int reco::SkimEvent::nCentralJets(float minPt,float eta,int applyCorrectio
 }
 
 const bool reco::SkimEvent::passesDPhillJet(float ptMin, float eta,int applyCorrection,int applyID) const {
+    if(leps_.size() < 2) return -9999.0;
+
     float dphi = 0, ptMax = 0;
     for(size_t i=0;i<jets_.size();++i) {
       if(!(passJetID(jets_[i],applyID)) ) continue;
@@ -1180,6 +1193,7 @@ const bool reco::SkimEvent::passesDPhillJet(float ptMin, float eta,int applyCorr
 }
 
 const float reco::SkimEvent::dPhillLeadingJet(float eta,int applyCorrection,int applyID) const {
+    if(leps_.size() < 2) return -9999.0;
     float dphi = 0, ptMax = 0;
     for(size_t i=0;i<jets_.size();++i) {
       if(!(passJetID(jets_[i],applyID)) ) continue;
@@ -1210,6 +1224,7 @@ const int reco::SkimEvent::leadingJetIndex(size_t index, float minPt,float eta,i
 }
 
 const float reco::SkimEvent::dPhilljetjet(float eta,int applyCorrection,int applyID) const {
+    if(leps_.size() < 2) return -9999.0;
     float dphi = -1;
     int jet1 = leadingJetIndex(0,0,eta,applyCorrection,applyID);
     int jet2 = leadingJetIndex(1,0,eta,applyCorrection,applyID);
@@ -1516,6 +1531,23 @@ const float reco::SkimEvent::tcMetY() const {
     else return -9999.0;
 }
 
+
+
+const float reco::SkimEvent::pfMetTypeI() const {
+
+ if(pfMetTypeI_.isNonnull()) return pfMetTypeI_->pt();
+ else return -9999.0;
+}
+
+const float reco::SkimEvent::pfMetTypeIPhi() const {
+
+ if(pfMetTypeI_.isNonnull()) return pfMetTypeI_->phi();
+ else return -9999.0;
+}
+
+
+
+
 const float reco::SkimEvent::mll() const {
   if(leps_.size() < 2) return -9999.0;
   return (leps_[0]->p4() + leps_[1]->p4()).mass();
@@ -1811,6 +1843,8 @@ const float reco::SkimEvent::afb(size_t i) const {
 const bool reco::SkimEvent::leptEtaCut(float maxAbsEtaMu,float maxAbsEtaEl) const{
   bool check0(true);
   bool check1(true);
+
+  if(leps_.size() < 2) return true;
 
   if(abs(leps_[0]->pdgId())==11 && fabs(leps_[0]->eta())>=maxAbsEtaEl) check0=false;
   if(abs(leps_[0]->pdgId())==13 && fabs(leps_[0]->eta())>=maxAbsEtaMu) check0=false;
@@ -2247,6 +2281,8 @@ const reco::Vertex reco::SkimEvent::highestPtVtx() const {
 }
 
 const bool reco::SkimEvent::passesIP() const {
+    if(leps_.size() < 2) return -9999.0;
+
     return (passesIP(leps_[0]) && passesIP(leps_[1]));
 }
 
@@ -2696,6 +2732,8 @@ const float reco::SkimEvent::matchedJetPt(size_t i, float minDr, bool applyCorre
 
 // New emanuele gamma mr star thingy
 const float reco::SkimEvent::mRStar() const {
+  if(leps_.size() < 2) return -9999.0;
+
   float A = leps_[0]->p();
   float B = leps_[1]->p();
   float az = leps_[0]->pz();
@@ -2711,6 +2749,8 @@ const float reco::SkimEvent::mRStar() const {
 }
 
 const float reco::SkimEvent::gamma() const {
+  if(leps_.size() < 2) return -9999.0;
+
   float A = leps_[0]->p();
   float B = leps_[1]->p();
   float az = leps_[0]->pz();
@@ -2868,6 +2908,151 @@ const float reco::SkimEvent::getFinalStateMC() const {
 
   return finalState;
 }
+
+
+
+//WZ
+const float reco::SkimEvent::getWZdecayMC() const {
+
+//   std::cout << " getFinalStateMC " << std::endl;
+  float finalState = -1;
+  // 3 = mmm
+  // 1 = eem
+  // 0 = eee
+  // 2 = mme
+
+ const reco::Candidate* mcW=0;
+ const reco::Candidate* mcZ=0;
+ // loop over gen particles
+  for(size_t gp=0; gp<genParticles_.size();++gp){
+    int pdgId  = genParticles_[gp] -> pdgId();
+    int status = genParticles_[gp] -> status();
+//if(status==3) std::cout<<pdgId<<" ";
+    if( (abs(pdgId) == 23) && (status == 3) ) 
+      mcZ = &(*(genParticles_[gp]));
+
+    if( (abs(pdgId) == 24) && (status == 3) ) 
+	mcW = &(*(genParticles_[gp]));
+ } // loop over gen particles
+
+	if ((mcZ==0 )) {
+  for(size_t gp=0; gp<genParticles_.size();++gp){
+    int pdgId  = genParticles_[gp] -> pdgId();
+    int status = genParticles_[gp] -> status();
+//	if (status==3) std::cout << pdgId << " " << status << std::endl;
+	if ( (abs(pdgId) == 24) && (status == 3)) {mcZ = &(*(genParticles_[gp]));continue;}
+}
+}	
+	if(mcZ!=0 && mcW !=0){
+    const reco::Candidate* mcF1_fromV1=0;
+    const reco::Candidate* mcF2_fromV1=0;
+    const reco::Candidate* mcF1_fromV2=0;
+    const reco::Candidate* mcF2_fromV2=0;
+
+
+    bool isWZok = true;
+    std::vector<const reco::Candidate*> fFromV1Buffer,fFromV1Buffer1,fFromV1Buffer2;
+    FindDaughterParticles(&mcW,&fFromV1Buffer);
+    if(fFromV1Buffer.size() == 2) {
+     mcF1_fromV1 = fFromV1Buffer.at(0);
+     mcF2_fromV1 = fFromV1Buffer.at(1);
+
+     if(abs(mcF1_fromV1 -> pdgId()) == 15) {
+      FindDaughterParticles(&mcF1_fromV1,&fFromV1Buffer1);
+	if(fFromV1Buffer1.size() == 3) {
+	if(abs((fFromV1Buffer1.at(0))-> pdgId()) == 11 || abs((fFromV1Buffer1.at(0))-> pdgId()) == 13) mcF1_fromV1 = fFromV1Buffer1.at(0);
+        else if(abs((fFromV1Buffer1.at(1))-> pdgId()) == 11 || abs((fFromV1Buffer1.at(1))-> pdgId()) == 13) mcF1_fromV1 = fFromV1Buffer1.at(1);
+	else if(abs((fFromV1Buffer1.at(2))-> pdgId()) == 11 || abs((fFromV1Buffer1.at(2))-> pdgId()) == 13) mcF1_fromV1 = fFromV1Buffer1.at(2);
+	}
+     }
+     else if(abs(mcF2_fromV1 -> pdgId()) == 15) {
+      FindDaughterParticles(&mcF2_fromV1,&fFromV1Buffer2);
+	if(fFromV1Buffer2.size() == 3) {
+        if(abs((fFromV1Buffer2.at(0))-> pdgId()) == 11 || abs((fFromV1Buffer2.at(0))-> pdgId()) == 13) mcF2_fromV1 = fFromV1Buffer2.at(0);
+        else if(abs((fFromV1Buffer2.at(1))-> pdgId()) == 11 || abs((fFromV1Buffer2.at(1))-> pdgId()) == 13) mcF2_fromV1 = fFromV1Buffer2.at(1);
+        else if(abs((fFromV1Buffer2.at(2))-> pdgId()) == 11 || abs((fFromV1Buffer2.at(2))-> pdgId()) == 13) mcF2_fromV1 = fFromV1Buffer2.at(2);
+	}
+     }
+    }
+    else {
+     isWZok  = false;
+    }
+
+    std::vector<const reco::Candidate*> fFromV2Buffer,fFromV2Buffer1,fFromV2Buffer2;
+    FindDaughterParticles(&mcZ,&fFromV2Buffer);
+    if(fFromV2Buffer.size() == 2) {
+     mcF1_fromV2 = fFromV2Buffer.at(0);
+     mcF2_fromV2 = fFromV2Buffer.at(1);
+
+     if(abs(mcF1_fromV2 -> pdgId()) == 15) {
+      FindDaughterParticles(&mcF1_fromV2,&fFromV2Buffer1);
+	if(fFromV2Buffer1.size() == 3) {
+	if(abs((fFromV2Buffer1.at(0))-> pdgId()) == 11 || abs((fFromV2Buffer1.at(0))-> pdgId()) == 13) mcF1_fromV2 = fFromV2Buffer1.at(0);
+	else if(abs((fFromV2Buffer1.at(1))-> pdgId()) == 11 || abs((fFromV2Buffer1.at(1))-> pdgId()) == 13) mcF1_fromV2 = fFromV2Buffer1.at(1);
+	else if(abs((fFromV2Buffer1.at(2))-> pdgId()) == 11 || abs((fFromV2Buffer1.at(2))-> pdgId()) == 13) mcF1_fromV2 = fFromV2Buffer1.at(2);
+	}
+     }
+     if(abs(mcF2_fromV2 -> pdgId()) == 15) {
+      FindDaughterParticles(&mcF2_fromV2,&fFromV2Buffer2);
+	if(fFromV2Buffer2.size() == 3) {
+	if(abs((fFromV2Buffer2.at(0))-> pdgId()) == 11 || abs((fFromV2Buffer2.at(0))-> pdgId()) == 13) mcF2_fromV2 = fFromV2Buffer2.at(0);
+        else if(abs((fFromV2Buffer2.at(1))-> pdgId()) == 11 || abs((fFromV2Buffer2.at(1))-> pdgId()) == 13) mcF2_fromV2 = fFromV2Buffer2.at(1);
+	else if(abs((fFromV2Buffer2.at(2))-> pdgId()) == 11 || abs((fFromV2Buffer2.at(2))-> pdgId()) == 13) mcF2_fromV2 = fFromV2Buffer2.at(2);
+	}
+     }
+    }
+    else {
+     isWZok  = false;
+    }
+
+
+if (isWZok) {
+
+     // mmm
+     if ( (abs(mcF1_fromV1 -> pdgId()) == 13 || abs(mcF2_fromV1 -> pdgId()) == 13) && (abs(mcF1_fromV2 -> pdgId()) == 13 && abs(mcF2_fromV2 -> pdgId()) == 13) ) 
+      finalState = 3;
+     
+     // mme
+     else if ( (abs(mcF1_fromV1 -> pdgId()) == 11 || abs(mcF2_fromV1 -> pdgId()) == 11) && (abs(mcF1_fromV2 -> pdgId()) == 13 && abs(mcF2_fromV2 -> pdgId()) == 13) )
+      finalState = 2;
+
+     // eee
+     else if ( (abs(mcF1_fromV1 -> pdgId()) == 11 || abs(mcF2_fromV1 -> pdgId()) == 11) && (abs(mcF1_fromV2 -> pdgId()) == 11 && abs(mcF2_fromV2 -> pdgId()) == 11) ) 
+      finalState = 0;
+     
+     // eem
+     else if ( (abs(mcF1_fromV1 -> pdgId()) == 13 || abs(mcF2_fromV1 -> pdgId()) == 13) && (abs(mcF1_fromV2 -> pdgId()) == 11 && abs(mcF2_fromV2 -> pdgId()) == 11) )
+      finalState = 1;
+/*
+     // ttt
+     else if ( (abs(mcF1_fromV1 -> pdgId()) == 15|| abs(mcF1_fromV1 -> pdgId()) == 16) && (abs(mcF1_fromV2 -> pdgId()) == 15|| abs(mcF1_fromV2 -> pdgId()) == 15) )
+      finalState = 4;
+
+     // ttm
+     else if ( (abs(mcF1_fromV1 -> pdgId()) == 13 || abs(mcF1_fromV1 -> pdgId()) == 14) && (abs(mcF1_fromV2 -> pdgId()) == 15|| abs(mcF1_fromV2 -> pdgId()) == 15) )
+      finalState = 5;
+
+     // mmt
+     else if ( (abs(mcF1_fromV1 -> pdgId()) == 15 || abs(mcF1_fromV1 -> pdgId()) == 16) && (abs(mcF1_fromV2 -> pdgId()) == 13|| abs(mcF1_fromV2 -> pdgId()) == 13) )
+      finalState = 6;
+
+     // tte
+     else if ( (abs(mcF1_fromV1 -> pdgId()) == 11 || abs(mcF1_fromV1 -> pdgId()) == 12) && (abs(mcF1_fromV2 -> pdgId()) == 15|| abs(mcF1_fromV2 -> pdgId()) == 15) )
+      finalState = 7;
+
+     // eet
+     else if ( (abs(mcF1_fromV1 -> pdgId()) == 15 || abs(mcF1_fromV1 -> pdgId()) == 16) && (abs(mcF1_fromV2 -> pdgId()) == 11 || abs(mcF1_fromV2 -> pdgId()) == 11) )
+      finalState = 8;*/
+	else finalState = 4;
+}
+    else {
+     finalState = -2;
+    }
+}
+return finalState;
+
+}
+
 
 
 
@@ -3151,7 +3336,7 @@ const float reco::SkimEvent::getHiggsMass() const {
 //   std::cout << " getSusyMass1 " << std::endl;
  float mass = -1;
 
- const reco::Candidate* mcH = 0;
+//  const reco::Candidate* mcH = 0;
 
   // loop over gen particles
  for(size_t gp=0; gp<genParticles_.size();++gp){
@@ -3161,8 +3346,9 @@ const float reco::SkimEvent::getHiggsMass() const {
    
     // Stop {1000006}
   if( (pdgId == 25) && (status == 3) ) {
-   mcH = &(*(genParticles_[gp]));
-   mass = mcH->mass();
+//    mcH = &(*(genParticles_[gp]));
+//    mass = mcH->mass();
+   mass = (&(*(genParticles_[gp])))->mass();
   }
  } // loop over gen particles
 
@@ -3170,8 +3356,7 @@ const float reco::SkimEvent::getHiggsMass() const {
 }
 
 
-
-const float reco::SkimEvent::getHiggsPt() const {
+const float reco::SkimEvent::getZPt() const {
 
 //   std::cout << " getSusyMass1 " << std::endl;
  float pt = -1;
@@ -3183,11 +3368,59 @@ const float reco::SkimEvent::getHiggsPt() const {
 
   int pdgId  = genParticles_[gp] -> pdgId();
   int status = genParticles_[gp] -> status();
+
+    // Stop {1000006}
+  if( (pdgId == 23) && (status == 3) ) {
+   mcH = &(*(genParticles_[gp]));
+   pt = mcH->pt();
+  }
+ } // loop over gen particles
+
+ return pt;
+}
+
+const float reco::SkimEvent::getZMass() const {
+
+//   std::cout << " getSusyMass1 " << std::endl;
+ float pt = -1;
+
+ const reco::Candidate* mcH = 0;
+
+  // loop over gen particles
+ for(size_t gp=0; gp<genParticles_.size();++gp){
+
+  int pdgId  = genParticles_[gp] -> pdgId();
+  int status = genParticles_[gp] -> status();
+
+    // Stop {1000006}
+  if( (pdgId == 23) && (status == 3) ) {
+   mcH = &(*(genParticles_[gp]));
+   pt = mcH->mass();
+  }
+ } // loop over gen particles
+
+ return pt;
+}
+
+
+const float reco::SkimEvent::getHiggsPt() const {
+
+//   std::cout << " getSusyMass1 " << std::endl;
+ float pt = -1;
+
+//  const reco::Candidate* mcH = 0;
+
+  // loop over gen particles
+ for(size_t gp=0; gp<genParticles_.size();++gp){
+
+  int pdgId  = genParticles_[gp] -> pdgId();
+  int status = genParticles_[gp] -> status();
    
     // Stop {1000006}
   if( (pdgId == 25) && (status == 3) ) {
-   mcH = &(*(genParticles_[gp]));
-   pt = mcH->pt();
+//    mcH = &(*(genParticles_[gp]));
+//    pt = mcH->pt();
+   pt = (&(*(genParticles_[gp])))->pt();
   }
  } // loop over gen particles
 
@@ -3648,6 +3881,8 @@ const float reco::SkimEvent::higgsLHEPt() const {
  return -9999.9;  //if no Higgs was found
 }
 
+
+
 const float reco::SkimEvent::leadingGenJetPartonPt(size_t index) const {
  std::vector<float> v_jets_pt ;
 
@@ -3898,6 +4133,281 @@ const float reco::SkimEvent::leadingGenNeutrinoPhi(size_t index) const {
  return particlePhi;
 }
 
+const float reco::SkimEvent::genVVLeptonPt(size_t a, bool onlyS1) const {
+  std::vector<float> pt;
+
+  float ptdef = -9999.9;
+  const reco::Candidate* mcH = 0;
+
+  for (size_t gp=0; gp<genParticles_.size(); ++gp) {
+    int type  = abs(genParticles_[gp]->pdgId());
+    int status = genParticles_[gp]->status();
+
+    if ((type == 11 || type == 13 || type == 15) && ((status == 3 && !onlyS1) || (status == 1 && onlyS1))) {
+      bool v_parent = false;
+      const reco::Candidate* curr = &(*(genParticles_[gp]));
+      while (curr->mother()) {
+	curr = curr->mother();
+	int pdg = abs(curr->pdgId());
+	if (pdg == 23 || pdg == 24) {
+	  v_parent = true;
+	  break;
+	}
+      }
+      if (v_parent) {
+	mcH = &(*(genParticles_[gp]));
+	pt.push_back(mcH->pt());
+      }
+    }
+  }
+  if (pt.size () > 0) {
+    std::sort (pt.rbegin (), pt.rend ()) ;
+  }
+  size_t count = 0;
+  for(size_t i=0;i<pt.size();++i) {
+    if(++count > a) return pt.at(i);
+  }
+  return ptdef;
+}
+
+const float reco::SkimEvent::genVVLeptonPID(size_t a, bool onlyS1) const {
+  float pt_ofIndex = genVVLeptonPt(a,onlyS1);
+  float particleID=-9999.9;
+  const reco::Candidate* mcH = 0;
+  // loop over gen particles
+ for(size_t gp=0; gp<genParticles_.size();++gp){
+   int type  = abs( genParticles_[gp] -> pdgId() );
+   int status = genParticles_[gp] -> status();
+   if( (type == 11 || type == 13 || type == 15) && ((status == 3 && !onlyS1) || (status == 1 && onlyS1)) ) {
+     mcH = &(*(genParticles_[gp]));
+     if( mcH->pt() != pt_ofIndex) continue;
+     particleID = (float) type;
+   }
+ } // loop over gen particles
+ return particleID;
+}
+const float reco::SkimEvent::genVVLeptonPhi(size_t a, bool onlyS1) const {
+  float pt_ofIndex = genVVLeptonPt(a,onlyS1);
+ float particlePhi=-9999.9;
+ const reco::Candidate* mcH = 0;
+  // loop over gen particles
+ for(size_t gp=0; gp<genParticles_.size();++gp){
+   int type  = abs( genParticles_[gp] -> pdgId() );
+   int status = genParticles_[gp] -> status();
+   if( (type == 11 || type == 13 || type == 15) && ((status == 3 && !onlyS1) || (status == 1 && onlyS1)) ) {
+     mcH = &(*(genParticles_[gp]));
+     if( mcH->pt() != pt_ofIndex) continue;
+     particlePhi = (float) mcH->phi();
+   }
+ } // loop over gen particles
+ return particlePhi;
+
+}
+const float reco::SkimEvent::genVVLeptonEta(size_t a, bool onlyS1) const {
+  float pt_ofIndex = genVVLeptonPt(a,onlyS1);
+ float particleEta=-9999.9;
+ const reco::Candidate* mcH = 0;
+  // loop over gen particles
+ for(size_t gp=0; gp<genParticles_.size();++gp){
+   int type  = abs( genParticles_[gp] -> pdgId() );
+   int status = genParticles_[gp] -> status();
+   if( (type == 11 || type == 13 || type == 15) && ((status == 3 && !onlyS1) || (status == 1 && onlyS1)) ) {
+     mcH = &(*(genParticles_[gp]));
+     if( mcH->pt() != pt_ofIndex) continue;
+     particleEta = (float) mcH->eta();
+   }
+ } // loop over gen particles
+ return particleEta;
+
+}
+const float reco::SkimEvent::genVVLeptonimTau(size_t a, bool onlyS1) const {
+  float pt_ofIndex = genVVLeptonPt(a,onlyS1);
+ float imTau=-9999.9;
+ const reco::Candidate* mcH = 0;
+  // loop over gen particles
+ for(size_t gp=0; gp<genParticles_.size();++gp){
+   int type  = abs( genParticles_[gp] -> pdgId() );
+   int status = genParticles_[gp] -> status();
+   if( (type == 11 || type == 13 || type == 15) && ((status == 3 && !onlyS1) || (status == 1 && onlyS1)) ) {
+     mcH = &(*(genParticles_[gp]));
+     if( mcH->pt() != pt_ofIndex) continue;
+     imTau = 0.0;
+     const reco::Candidate* curr = mcH;
+     while (curr->mother()) {
+       curr = curr->mother();
+       if (abs(curr->pdgId()) == 15) imTau = 1.0;
+     }
+   }
+ } // loop over gen particles
+ return imTau;
+}
+const float reco::SkimEvent::genVVLeptonoVPID(size_t a, bool onlyS1) const {
+  float pt_ofIndex = genVVLeptonPt(a,onlyS1);
+ float oVPID=-9999.9;
+ const reco::Candidate* mcH = 0;
+  // loop over gen particles
+ for(size_t gp=0; gp<genParticles_.size();++gp){
+   int type  = abs( genParticles_[gp] -> pdgId() );
+   int status = genParticles_[gp] -> status();
+   if( (type == 11 || type == 13 || type == 15) && ((status == 3 && !onlyS1) || (status == 1 && onlyS1)) ) {
+     mcH = &(*(genParticles_[gp]));
+     if( mcH->pt() != pt_ofIndex) continue;
+     const reco::Candidate* curr = mcH;
+     while (curr->mother()) {
+       curr = curr->mother();
+       int pdg = curr->pdgId();
+       int status = curr->status();
+       if (abs(pdg) == 23 || abs(pdg) == 24) {
+	 oVPID = pdg;
+	 break;
+       }
+     }
+   }
+ } // loop over gen particles
+ return oVPID;
+}
+
+const float reco::SkimEvent::genVVS1LeptonPt(size_t a) const { return genVVLeptonPt(a,true); }
+const float reco::SkimEvent::genVVS1LeptonPID(size_t a) const { return genVVLeptonPID(a,true); }
+const float reco::SkimEvent::genVVS1LeptonPhi(size_t a) const { return genVVLeptonPhi(a,true); }
+const float reco::SkimEvent::genVVS1LeptonEta(size_t a) const { return genVVLeptonEta(a,true); }
+const float reco::SkimEvent::genVVS1LeptonimTau(size_t a) const { return genVVLeptonimTau(a,true); }
+const float reco::SkimEvent::genVVS1LeptonoVPID(size_t a) const { return genVVLeptonoVPID(a,true); }
+
+
+const float reco::SkimEvent::genVVNeutrinoPt(size_t a) const {
+  std::vector<float> pt;
+
+  float ptdef = -9999.9;
+  const reco::Candidate* mcH = 0;
+
+  for (size_t gp=0; gp<genParticles_.size(); ++gp) {
+    int type  = abs(genParticles_[gp]->pdgId());
+    int status = genParticles_[gp]->status();
+
+    if ((type == 12 || type == 14 || type == 16) && (status == 3)) {
+      bool v_parent = false;
+      const reco::Candidate* curr = &(*(genParticles_[gp]));
+      while (curr->mother()) {
+	curr = curr->mother();
+	int pdg = abs(curr->pdgId());
+	if (pdg == 23 || pdg == 24) {
+	  v_parent = true;
+	  break;
+	}
+      }
+      if (v_parent) {
+	mcH = &(*(genParticles_[gp]));
+	pt.push_back(mcH->pt());
+      }
+    }
+  }
+  if (pt.size () > 0) {
+    std::sort (pt.rbegin (), pt.rend ()) ;
+  }
+  size_t count = 0;
+  for(size_t i=0;i<pt.size();++i) {
+    if(++count > a) return pt.at(i);
+  }
+  return ptdef;
+
+}
+const float reco::SkimEvent::genVVNeutrinoPID(size_t a) const {
+ float pt_ofIndex = genVVNeutrinoPt(a);
+ float particleID=-9999.9;
+ const reco::Candidate* mcH = 0;
+  // loop over gen particles
+ for(size_t gp=0; gp<genParticles_.size();++gp){
+   int type  = abs( genParticles_[gp] -> pdgId() );
+   int status = genParticles_[gp] -> status();
+   if( (type == 12 || type == 14 || type == 16) && (status == 3) ) {
+     mcH = &(*(genParticles_[gp]));
+     if( mcH->pt() != pt_ofIndex) continue;
+     particleID = (float) type;
+   }
+ } // loop over gen particles
+ return particleID;
+}
+const float reco::SkimEvent::genVVNeutrinoPhi(size_t a) const {
+ float pt_ofIndex = genVVNeutrinoPt(a);
+ float particlePhi=-9999.9;
+ const reco::Candidate* mcH = 0;
+  // loop over gen particles
+ for(size_t gp=0; gp<genParticles_.size();++gp){
+   int type  = abs( genParticles_[gp] -> pdgId() );
+   int status = genParticles_[gp] -> status();
+   if( (type == 12 || type == 14 || type == 16) && (status == 3) ) {
+     mcH = &(*(genParticles_[gp]));
+     if( mcH->pt() != pt_ofIndex) continue;
+     particlePhi = (float) mcH->phi();
+   }
+ } // loop over gen particles
+ return particlePhi;
+
+}
+const float reco::SkimEvent::genVVNeutrinoEta(size_t a) const {
+ float pt_ofIndex = genVVNeutrinoPt(a);
+ float particleEta=-9999.9;
+ const reco::Candidate* mcH = 0;
+  // loop over gen particles
+ for(size_t gp=0; gp<genParticles_.size();++gp){
+   int type  = abs( genParticles_[gp] -> pdgId() );
+   int status = genParticles_[gp] -> status();
+   if( (type == 12 || type == 14 || type == 16) && (status == 3) ) {
+     mcH = &(*(genParticles_[gp]));
+     if( mcH->pt() != pt_ofIndex) continue;
+     particleEta = (float) mcH->eta();
+   }
+ } // loop over gen particles
+ return particleEta;
+}
+const float reco::SkimEvent::genVVNeutrinoimTau(size_t a) const {
+ float pt_ofIndex = genVVNeutrinoPt(a);
+ float imTau=-9999.9;
+ const reco::Candidate* mcH = 0;
+  // loop over gen particles
+ for(size_t gp=0; gp<genParticles_.size();++gp){
+   int type  = abs( genParticles_[gp] -> pdgId() );
+   int status = genParticles_[gp] -> status();
+   if( (type == 12 || type == 14 || type == 16) && (status == 3) ) {
+     mcH = &(*(genParticles_[gp]));
+     if( mcH->pt() != pt_ofIndex) continue;
+     imTau = 0.0;
+     const reco::Candidate* curr = mcH;
+     while (curr->mother()) {
+       curr = curr->mother();
+       if (abs(curr->pdgId()) == 15) imTau = 1.0;
+     }
+   }
+ } // loop over gen particles
+ return imTau;
+}
+const float reco::SkimEvent::genVVNeutrinooVPID(size_t a) const {
+ float pt_ofIndex = genVVNeutrinoPt(a);
+ float oVPID=-9999.9;
+ const reco::Candidate* mcH = 0;
+  // loop over gen particles
+ for(size_t gp=0; gp<genParticles_.size();++gp){
+   int type  = abs( genParticles_[gp] -> pdgId() );
+   int status = genParticles_[gp] -> status();
+   if( (type == 12 || type == 14 || type == 16) && (status == 3) ) {
+     mcH = &(*(genParticles_[gp]));
+     if( mcH->pt() != pt_ofIndex) continue;
+     const reco::Candidate* curr = mcH;
+     while (curr->mother()) {
+       curr = curr->mother();
+       int pdg = curr->pdgId();
+       if (abs(pdg) == 23 || abs(pdg) == 24) {
+	 oVPID = pdg;
+	 break;
+       }
+     }
+   }
+ } // loop over gen particles
+ return oVPID;
+}
+
+
 const float reco::SkimEvent::genMetPt() const {
   float pT = -9999.9;
   if(genMet_.isNonnull())  pT = genMet_->pt();
@@ -3963,6 +4473,18 @@ const float reco::SkimEvent::leadingGenJetEta(size_t index) const {
  return eta;
 }
 
+
+const int reco::SkimEvent::nCentralGenJets(float minPt,float eta) const {
+
+ int count = 0;
+ // loop over particles in the event
+ for (unsigned int  iPart = 0 ; iPart < genJets_.size (); ++iPart) {
+  if ( abs(genJets_[iPart]->eta()) >  eta  ) continue ;
+  if (     genJets_[iPart]->pt()   <= minPt) continue ;
+  count++;
+ }
+ return count;
+}
 
 
 const int reco::SkimEvent::numberOfbQuarks() const {

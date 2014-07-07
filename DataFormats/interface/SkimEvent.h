@@ -147,6 +147,7 @@ namespace reco {
             void FindDaughterParticles(const reco::Candidate** pCurrent, std::vector<const reco::Candidate*>* pFinal = 0) const;
             const float getFinalStateMC() const;
             const float getWWdecayMC() const;
+	    const float getWZdecayMC() const;
             const float mcHiggsProd() const;
 
             const float HEPMCweight() const ;
@@ -158,6 +159,8 @@ namespace reco {
             const float getHiggsPt() const;
             const float getSusyStopMass() const;
             const float getSusyLSPMass() const;
+	    const float getZPt() const;
+	    const float getZMass() const;
 
             const float getPDFscalePDF() const;
             const float getPDFx1() const;
@@ -286,6 +289,8 @@ namespace reco {
             const float chargedMetSmurfPhi() const{return chargedMetSmurf_.phi();}
             const float pfMetSignificance() const;
             const float pfMetMEtSig() const;
+            const float pfMetTypeI() const ;
+            const float pfMetTypeIPhi() const ;
             //const float minMet() const;
             //const math::XYZTLorentzVector minMetP4() const;
             const float mll() const;
@@ -388,6 +393,27 @@ namespace reco {
             const float leadingGenJetPt(size_t a) const;
             const float leadingGenJetEta(size_t a) const;
             const float leadingGenJetPhi(size_t a) const;
+            const int   nCentralGenJets(float minPt,float eta) const;
+
+	    const float genVVLeptonPt(size_t a, bool onlyS1 = false) const;
+	    const float genVVLeptonPID(size_t a, bool onlyS1 = false) const;
+	    const float genVVLeptonPhi(size_t a, bool onlyS1 = false) const;
+	    const float genVVLeptonEta(size_t a, bool onlyS1 = false) const;
+	    const float genVVLeptonimTau(size_t a, bool onlyS1 = false) const;
+	    const float genVVLeptonoVPID(size_t a, bool onlyS1 = false) const;
+	    const float genVVS1LeptonPt(size_t a) const;
+	    const float genVVS1LeptonPID(size_t a) const;
+	    const float genVVS1LeptonPhi(size_t a) const;
+	    const float genVVS1LeptonEta(size_t a) const;
+	    const float genVVS1LeptonimTau(size_t a) const;
+	    const float genVVS1LeptonoVPID(size_t a) const;
+
+	    const float genVVNeutrinoPt(size_t a) const;
+	    const float genVVNeutrinoPID(size_t a) const;
+	    const float genVVNeutrinoPhi(size_t a) const;
+	    const float genVVNeutrinoEta(size_t a) const;
+	    const float genVVNeutrinoimTau(size_t a) const;
+	    const float genVVNeutrinooVPID(size_t a) const;
 
             const float genMetPt() const;
 	    const float genMetPhi() const;
@@ -410,6 +436,7 @@ namespace reco {
             void setTagJets(const edm::Handle<pat::JetCollection> &);
             void setTCMet(const edm::Handle<reco::METCollection> &);
             void setPFMet(const edm::Handle<reco::PFMETCollection> &);
+            void setPFMetTypeI(const edm::Handle<reco::PFMETCollection> &);
             void setMvaMet(const reco::PFMET &met) {mvaMet_ = met;}
             void setChargedMet(const reco::PFMET &);
             void setChargedMetSmurf(const reco::MET& met) {chargedMetSmurf_ = met;}
@@ -549,6 +576,7 @@ namespace reco {
             reco::PFMET mvaMet_;
             reco::PFMET chargedMet_;
             reco::MET chargedMetSmurf_;
+            reco::PFMETRef pfMetTypeI_;
             std::vector<refToCand> leps_;
             std::vector<refToCand> extraLeps_;
             std::vector<refToCand> softMuons_;

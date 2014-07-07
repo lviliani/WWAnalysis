@@ -82,6 +82,18 @@ options.register ('doSusy',
                   opts.VarParsing.varType.bool,
                   'Turn on Susy MC dumper (can be \'True\' or \'False\'')
 
+options.register ('doNoFilter',
+                  False,                                    # default value
+                  opts.VarParsing.multiplicity.singleton,   # singleton or list
+                  opts.VarParsing.varType.bool,
+                  'Turn on no filter requirement, not even requiring 2 leptons! Needed for unfolding at GEN (can be \'True\' or \'False\'')
+
+options.register ('doFatJet',
+                  False,                                    # default value
+                  opts.VarParsing.multiplicity.singleton,   # singleton or list
+                  opts.VarParsing.varType.bool,
+                  'Turn on Fat (can be \'True\' or \'False\'')
+
 #-------------------------------------------------------------------------------
 # defaults
 options.outputFile = 'latinosYieldSkim.root'
@@ -114,7 +126,8 @@ isVV             = False
 doBorisGenFilter = False
 correctMetPhi    = options.correctMetPhi
 doSusy           = options.doSusy
-
+doNoFilter       = options.doNoFilter
+doFatJet         = options.doFatJet
 
 
 labelJetRho = "RECO"
@@ -154,7 +167,6 @@ if not isMC:
          tag = cms.string("TrackProbabilityCalibration_3D_2012DataTOT_v1_offline"),
          connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU"))
          )
-
 
 process.source = cms.Source('PoolSource',fileNames=cms.untracked.vstring( inputFiles ), skipEvents=cms.untracked.uint32( skipEvents ) )
 process.out    = cms.OutputModule("PoolOutputModule", outputCommands =  cms.untracked.vstring(), fileName = cms.untracked.string( outputFile ) )
@@ -475,68 +487,72 @@ switchJetCollection(
 
 
 
+if doFatJet :
 
-# for FatJets #
+    # for FatJets #
 
-from RecoJets.JetProducers.ca4PFJets_cfi import ca4PFJets
+    from RecoJets.JetProducers.ca4PFJets_cfi import ca4PFJets
 
-process.ca8PFJetsPFlow = ca4PFJets.clone(
-    rParam = cms.double(0.8),
-    src = cms.InputTag('pfNoPileUp'),
-    doAreaFastjet = cms.bool(True),
-    doRhoFastjet = cms.bool(True),
-    Rho_EtaMax = cms.double(4.4),  ## sure?
-    Ghost_EtaMax = cms.double(5.0)  ## sure?
-  )
+    process.ca8PFJetsPFlow = ca4PFJets.clone(
+        rParam = cms.double(0.8),
+        src = cms.InputTag('pfNoPileUp'),
+        doAreaFastjet = cms.bool(True),
+        doRhoFastjet = cms.bool(True),
+        Rho_EtaMax = cms.double(4.4),  ## sure?
+        Ghost_EtaMax = cms.double(5.0)  ## sure?
+      )
 
-addJetCollection(
-    process,
-    cms.InputTag('ca8PFJetsPFlow'), # Jet collection; must be already in the event when patLayer0 sequence is executed
-    algoLabel     = "CA8",
-    typeLabel     = "PF",
-    doJTA         = True, # Run Jet-Track association & JetCharge
-    doBTagging    = True, # Run b-tagging
-    #jetCorrLabel  = ('AK7PF',myCorrLabels),
-    jetCorrLabel  = ('AK7PF',emptyCorrLabels), # ---> no jet corrections
-    doType1MET    = True,
-    doL1Cleaning  = False,
-    doL1Counters  = False,
-    #genJetCollection = cms.InputTag("ca8GenJetsNoNu"),
-    doJetID       = False
-    )
+    addJetCollection(
+        process,
+        cms.InputTag('ca8PFJetsPFlow'), # Jet collection; must be already in the event when patLayer0 sequence is executed
+        algoLabel     = "CA8",
+        typeLabel     = "PF",
+        doJTA         = True, # Run Jet-Track association & JetCharge
+        doBTagging    = True, # Run b-tagging
+        #jetCorrLabel  = ('AK7PF',myCorrLabels),
+        jetCorrLabel  = ('AK7PF',emptyCorrLabels), # ---> no jet corrections
+        doType1MET    = True,
+        doL1Cleaning  = False,
+        doL1Counters  = False,
+        #genJetCollection = cms.InputTag("ca8GenJetsNoNu"),
+        doJetID       = False
+        )
 
-process.pfInputsCA8 = cms.EDProducer(
-      "CandViewNtpProducer",
-      src = cms.InputTag('selectedPatJetsCA8PF', 'pfCandidates'),
-      lazyParser = cms.untracked.bool(True),
-      eventInfo = cms.untracked.bool(False),
-      variables = cms.VPSet(
-          cms.PSet(
-              tag = cms.untracked.string("px"),
-              quantity = cms.untracked.string("px")
-              ),
-          cms.PSet(
-              tag = cms.untracked.string("py"),
-              quantity = cms.untracked.string("py")
-              ),
-          cms.PSet(
-              tag = cms.untracked.string("pz"),
-              quantity = cms.untracked.string("pz")
-              ),
-          cms.PSet(
-              tag = cms.untracked.string("energy"),
-              quantity = cms.untracked.string("energy")
-              ),
-          cms.PSet(
-              tag = cms.untracked.string("pdgId"),
-              quantity = cms.untracked.string("pdgId")
+    process.pfInputsCA8 = cms.EDProducer(
+          "CandViewNtpProducer",
+          src = cms.InputTag('selectedPatJetsCA8PF', 'pfCandidates'),
+          lazyParser = cms.untracked.bool(True),
+          eventInfo = cms.untracked.bool(False),
+          variables = cms.VPSet(
+              cms.PSet(
+                  tag = cms.untracked.string("px"),
+                  quantity = cms.untracked.string("px")
+                  ),
+              cms.PSet(
+                  tag = cms.untracked.string("py"),
+                  quantity = cms.untracked.string("py")
+                  ),
+              cms.PSet(
+                  tag = cms.untracked.string("pz"),
+                  quantity = cms.untracked.string("pz")
+                  ),
+              cms.PSet(
+                  tag = cms.untracked.string("energy"),
+                  quantity = cms.untracked.string("energy")
+                  ),
+              cms.PSet(
+                  tag = cms.untracked.string("pdgId"),
+                  quantity = cms.untracked.string("pdgId")
+                  )
               )
-          )
-  )
+      )
 
-# add to the sequence
-process.preLeptonSequence.replace( process.pfNoPileUp, process.pfNoPileUp*process.ca8PFJetsPFlow )
-process.patDefaultSequence.replace (process.selectedPatJetsCA8PF, process.selectedPatJetsCA8PF*process.pfInputsCA8)
+    # add to the sequence
+    process.preLeptonSequence.replace( process.pfNoPileUp, process.pfNoPileUp*process.ca8PFJetsPFlow )
+    process.patDefaultSequence.replace (process.selectedPatJetsCA8PF, process.selectedPatJetsCA8PF*process.pfInputsCA8)
+
+
+
 
 
 
@@ -979,6 +995,7 @@ process.out.outputCommands =  cms.untracked.vstring(
     #'keep *_pfNoPileUp_*_*',
     'keep *_pfInputsCA8_*_*',
     'keep *_selectedPatJetsCA8PF__*',
+    'keep recoGenJets_ak5GenJets*NoNu_*_Yield'
 )
 
 process.prePatSequence  = cms.Sequence( process.preLeptonSequence + process.preElectronSequence + process.preMuonSequence + process.PFTau)
@@ -1006,9 +1023,12 @@ process.outpath    = cms.EndPath(process.out)
 if  doPF2PATAlso:
     process.patPath = cms.Path( process.preYieldFilter + process.prePatSequence * process.patDefaultSequence * process.pfLeptonsOnly * process.postPatSequence )
     process.fakPath = cms.Path( process.preFakeFilter + process.prePatSequence * process.patDefaultSequence * process.pfLeptonsOnly * process.postPatSequence )
+    process.allPath = cms.Path(                         process.prePatSequence * process.patDefaultSequence * process.pfLeptonsOnly * process.postPatSequence )
+
 else:
     process.patPath = cms.Path( process.preYieldFilter + process.prePatSequence * process.patDefaultSequence * process.postPatSequence)
     process.fakPath = cms.Path( process.preFakeFilter + process.prePatSequence * process.patDefaultSequence * process.postPatSequence )
+    process.allPath = cms.Path(                         process.prePatSequence * process.patDefaultSequence * process.postPatSequence )
 
 process.out.SelectEvents   = cms.untracked.PSet(SelectEvents = cms.vstring('patPath'))
 
@@ -1024,7 +1044,21 @@ elif doFakeRates == 'also':
 elif doFakeRates == 'only':
     process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring( 'fakPath' ))
     process.schedule = cms.Schedule( process.fakPath, process.scrap, process.outpath)
-    
+
+if doNoFilter :
+    ##Extra GenJets
+    process.load('RecoJets.Configuration.RecoGenJets_cff')
+    process.load('RecoJets.Configuration.GenJetParticles_cff')
+    process.genParticlesForJetsNoElNoMuNoNu = process.genParticlesForJetsNoMuNoNu.clone()
+    process.genParticlesForJetsNoElNoMuNoNu.ignoreParticleIDs += cms.vuint32( 11)
+    process.ak5GenJetsNoElNoMuNoNu = process.ak5GenJetsNoMuNoNu.clone()
+    process.ak5GenJetsNoElNoMuNoNu.src = cms.InputTag("genParticlesForJetsNoElNoMuNoNu")
+    process.extraGenJets = cms.Sequence(process.genParticlesForJetsNoNu+process.ak5GenJetsNoNu+process.genParticlesForJetsNoMuNoNu+process.ak5GenJetsNoMuNoNu+process.genParticlesForJetsNoElNoMuNoNu+process.ak5GenJetsNoElNoMuNoNu)
+    process.allPath += process.extraGenJets
+    #No need to run patPath (with preYieldFilter)
+    process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring( 'allPath' ))
+    process.schedule = cms.Schedule( process.allPath, process.scrap, process.outpath)
+
 
 if doTauEmbed == True:
     process.out.outputCommands.extend(

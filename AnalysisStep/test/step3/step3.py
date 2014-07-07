@@ -114,6 +114,31 @@ options.register ('doGen',
                        opts.VarParsing.varType.bool,
                        'Turn on gen Variables dumper (can be \'True\' or \'False\'')
 
+options.register ('doGenVV',
+                       False,                                    # default value
+                       opts.VarParsing.multiplicity.singleton,   # singleton or list
+                       opts.VarParsing.varType.bool,
+                       'Turn on gen truth Variables dumper (can be \'True\' or \'False\'')
+
+
+options.register ('doNoFilter',
+                  False,                                    # default value
+                  opts.VarParsing.multiplicity.singleton,   # singleton or list
+                  opts.VarParsing.varType.bool,
+                  'Turn on no filter requirement, not even requiring 2 leptons! Needed for unfolding at GEN (can be \'True\' or \'False\'')
+
+options.register ('acceptDuplicates',
+                  False,                                    # default value
+                  opts.VarParsing.multiplicity.singleton,   # singleton or list
+                  opts.VarParsing.varType.bool,
+                  'accept duplicates. Suggested true for private production (can be \'True\' or \'False\'')
+
+options.register ('doFatJet',
+                  False,                                    # default value
+                  opts.VarParsing.multiplicity.singleton,   # singleton or list
+                  opts.VarParsing.varType.bool,
+                  'Turn on Fat (can be \'True\' or \'False\'')
+
 
 #-------------------------------------------------------------------------------
 # defaults
@@ -130,9 +155,20 @@ process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.destinations = ['cout', 'cerr']
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
-process.source = cms.Source('PoolSource',fileNames=cms.untracked.vstring( options.inputFiles ), skipEvents=cms.untracked.uint32( options.skipEvents ) )
+if options.acceptDuplicates :
+    process.source = cms.Source('PoolSource',
+          fileNames  = cms.untracked.vstring( options.inputFiles ),
+          skipEvents = cms.untracked.uint32( options.skipEvents ),
+          duplicateCheckMode  = cms.untracked.string('noDuplicateCheck'),
+          )
+else :
+    process.source = cms.Source('PoolSource',
+          fileNames  = cms.untracked.vstring( options.inputFiles ),
+          skipEvents = cms.untracked.uint32( options.skipEvents ),
+          )
 
 process.source.inputCommands = cms.untracked.vstring( "keep *", "drop *_conditionsInEdm_*_*",  "drop *_MEtoEDMConverter_*_*")
+
 
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(options.summary))
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.maxEvents) )
@@ -144,64 +180,64 @@ from WWAnalysis.AnalysisStep.step3_cff import * # get also functions
 
 #########################################
 # add CA jets for FatJet
-#def addFatJet(process):
-    #from RecoJets.JetProducers.ak5PFJets_cfi import ak5PFJets
-    #process.ca8PFJetsCHS = ak5PFJets.clone(
-        #src = 'pfNoPileUp',
-        #jetPtMin = cms.double(10.0),
-        #doAreaFastjet = cms.bool(True),
-        #rParam = cms.double(0.8),
-        #jetAlgorithm = cms.string("CambridgeAachen"),
+def addFatJet(process):
+    from RecoJets.JetProducers.ak5PFJets_cfi import ak5PFJets
+    process.ca8PFJetsCHS = ak5PFJets.clone(
+        src = 'pfNoPileUp',
+        jetPtMin = cms.double(10.0),
+        doAreaFastjet = cms.bool(True),
+        rParam = cms.double(0.8),
+        jetAlgorithm = cms.string("CambridgeAachen"),
+    )
+
+    jetSource = 'ca8PFJetsCHS'
+
+    # corrections 
+    from PhysicsTools.PatAlgos.recoLayer0.jetCorrFactors_cfi import patJetCorrFactors
+    process.patJetCorrFactorsCA8CHS = patJetCorrFactors.clone()
+    process.patJetCorrFactorsCA8CHS.src = jetSource
+    # will need to add L2L3 corrections in the cfg
+    process.patJetCorrFactorsCA8CHS.levels = ['L1FastJet', 'L2Relative', 'L3Absolute']
+    process.patJetCorrFactorsCA8CHS.payload = 'AK7PFchs'
+    process.patJetCorrFactorsCA8CHS.useRho = True
+
+    # pat jet
+    from PhysicsTools.PatAlgos.producersLayer1.jetProducer_cfi import patJets
+    process.patJetsCA8CHS = patJets.clone()
+    process.patJetsCA8CHS.jetSource = jetSource
+    process.patJetsCA8CHS.addJetCharge = False
+    process.patJetsCA8CHS.embedCaloTowers = False
+    process.patJetsCA8CHS.embedPFCandidates = False
+    process.patJetsCA8CHS.addAssociatedTracks = False
+    process.patJetsCA8CHS.addBTagInfo = False
+    process.patJetsCA8CHS.addDiscriminators = False
+    process.patJetsCA8CHS.getJetMCFlavour = False
+    process.patJetsCA8CHS.jetCorrFactorsSource = cms.VInputTag(cms.InputTag('patJetCorrFactorsCA8CHS'))
+    process.patJetsCA8CHS.genPartonMatch = cms.InputTag('patJetPartonMatchCA8CHS')
+    process.patJetsCA8CHS.genJetMatch = cms.InputTag('patJetGenJetMatchCA8CHS')
+
+    from PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi import selectedPatJets
+    process.selectedPatJetsCA8CHS = selectedPatJets.clone()
+    process.selectedPatJetsCA8CHS.src = 'patJetsCA8CHS'
+    process.selectedPatJetsCA8CHS.cut = 'pt()>20'
+
+
+#process.jetMCSequenceCA8CHS = cms.Sequence(
+    #process.patJetPartonMatchCA8CHS +
+    #process.genParticlesForJetsNoNu +
+    #process.ca8GenJetsNoNu +
+    #process.patJetGenJetMatchCA8CHS
     #)
 
-    #jetSource = 'ca8PFJetsCHS'
+    process.PATJetSequenceCA8CHS = cms.Sequence(
+        process.ca8PFJetsCHS +
+        #process.jetMCSequenceCA8CHS +
+        process.patJetCorrFactorsCA8CHS
+        #process.patJetsCA8CHS +
+        #process.selectedPatJetsCA8CHS
+        )
 
-    ## corrections 
-    #from PhysicsTools.PatAlgos.recoLayer0.jetCorrFactors_cfi import *
-    #process.patJetCorrFactorsCA8CHS = patJetCorrFactors.clone()
-    #process.patJetCorrFactorsCA8CHS.src = jetSource
-    ## will need to add L2L3 corrections in the cfg
-    #process.patJetCorrFactorsCA8CHS.levels = ['L1FastJet', 'L2Relative', 'L3Absolute']
-    #process.patJetCorrFactorsCA8CHS.payload = 'AK7PFchs'
-    #process.patJetCorrFactorsCA8CHS.useRho = True
-
-    ## pat jet
-    #from PhysicsTools.PatAlgos.producersLayer1.jetProducer_cfi import *
-    #process.patJetsCA8CHS = patJets.clone()
-    #process.patJetsCA8CHS.jetSource = jetSource
-    #process.patJetsCA8CHS.addJetCharge = False
-    #process.patJetsCA8CHS.embedCaloTowers = False
-    #process.patJetsCA8CHS.embedPFCandidates = False
-    #process.patJetsCA8CHS.addAssociatedTracks = False
-    #process.patJetsCA8CHS.addBTagInfo = False
-    #process.patJetsCA8CHS.addDiscriminators = False
-    #process.patJetsCA8CHS.getJetMCFlavour = False
-    #process.patJetsCA8CHS.jetCorrFactorsSource = cms.VInputTag(cms.InputTag('patJetCorrFactorsCA8CHS'))
-    #process.patJetsCA8CHS.genPartonMatch = cms.InputTag('patJetPartonMatchCA8CHS')
-    #process.patJetsCA8CHS.genJetMatch = cms.InputTag('patJetGenJetMatchCA8CHS')
-
-    #from PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi import *
-    #process.selectedPatJetsCA8CHS = selectedPatJets.clone()
-    #process.selectedPatJetsCA8CHS.src = 'patJetsCA8CHS'
-    #process.selectedPatJetsCA8CHS.cut = 'pt()>20'
-
-
-##process.jetMCSequenceCA8CHS = cms.Sequence(
-    ##process.patJetPartonMatchCA8CHS +
-    ##process.genParticlesForJetsNoNu +
-    ##process.ca8GenJetsNoNu +
-    ##process.patJetGenJetMatchCA8CHS
-    ##)
-
-    #process.PATJetSequenceCA8CHS = cms.Sequence(
-        #process.ca8PFJetsCHS +
-        ##process.jetMCSequenceCA8CHS +
-        #process.patJetCorrFactorsCA8CHS
-        ##process.patJetsCA8CHS +
-        ##process.selectedPatJetsCA8CHS
-        #)
-
-    #process.PATJetPathCA8CHS = cms.Path ( process.PATJetSequenceCA8CHS )
+    process.PATJetPathCA8CHS = cms.Path ( process.PATJetSequenceCA8CHS )
 
 
 #addFatJet(process)
@@ -254,10 +290,13 @@ def addMuVars( s3 ):
 
 doLHE            = options.doLHE
 doGen            = options.doGen
+doGenVV          = options.doGenVV
 doHiggs          = options.doHiggs
 doSusy           = options.doSusy
 doTauEmbed       = options.doTauEmbed
-SameSign         = options.doSameSign  
+SameSign         = options.doSameSign
+doNoFilter       = options.doNoFilter
+
 
 id = 0
 json    = None
@@ -285,6 +324,7 @@ if label in  [ 'SingleElectron', 'DoubleElectron', 'SingleMuon', 'DoubleMuon', '
     scalef  = 1
     doPDFvar = False
     doGen = false
+    doGenVV = false
     doLHE = false
 
 
@@ -295,6 +335,7 @@ elif doTauEmbed == True:
     scalef  = 1
     doPDFvar = False
     doGen = false
+    doGenVV = false
     doLHE = false
 
 
@@ -315,7 +356,6 @@ else:
     s = re.match("Higgs0M*", label)
     t = re.match("SMH125*", label)
     doPDFvar = True
-    doGen = True
     if m:
         mhiggs = int(m.group(1))
         fourthGenSF = fourthGenScales[int(m.group(1))]
@@ -373,7 +413,8 @@ else:
 
 # process.schedule = cms.Schedule()
 process.load("WWAnalysis.AnalysisStep.hww_reboosting_cff")
-if doPDFvar: process.slimPatJetsTriggerMatch.isData=  cms.untracked.bool(False)
+if doPDFvar: process.slimPatJetsTriggerMatch.isData = cms.untracked.bool(False)
+if not options.doFatJet: process.reboosting.remove(process.slimPatFatJetsTriggerMatch)
 
 process.preSkim = cms.Path(process.reboosting)
 
@@ -410,6 +451,11 @@ for X in "elel", "mumu", "elmu", "muel":
         getattr(process,"ww%s%s"% (X,label)).mcLHEEventInfoTag = "source"
 
     if doGen == True :
+        getattr(process,"ww%s%s"% (X,label)).genParticlesTag = "prunedGen"
+        getattr(process,"ww%s%s"% (X,label)).genMetTag = "genMetTrue"
+	getattr(process,"ww%s%s"% (X,label)).genJetTag = cms.InputTag("selectedPatJets","genJets","Yield")
+
+    if doGenVV == True :
         getattr(process,"ww%s%s"% (X,label)).genParticlesTag = "prunedGen"
         getattr(process,"ww%s%s"% (X,label)).genMetTag = "genMetTrue"
 	getattr(process,"ww%s%s"% (X,label)).genJetTag = cms.InputTag("selectedPatJets","genJets","Yield")
@@ -459,9 +505,13 @@ for X in "elel", "mumu", "elmu", "muel", "ellell":
 
     if doGen: addGenVariables(process,tree)
 
+    if doGenVV: addGenVVVariables(process,tree)
+
+
     addAdditionalJets(process,tree)
 
-    addFatJets(process,tree)
+    if options.doFatJet :
+        addFatJets(process,tree)
 
 
     if dataset[0] == 'MC':
@@ -502,6 +552,11 @@ for X in "elel", "mumu", "elmu", "muel", "ellell":
 
         if id in ["036", "037", "037c0", "037c1", "037c2", "037c3", "037c4", "037c5", "037c6", "037c7", "037c8", "037c9", "042", "043", "045", "046" ]: # DY-Madgraph sample
             tree.variables.mctruth = cms.string("getFinalStateMC()")
+
+    if id in ["077", "078", "074" ]: 
+	tree.variables.PtZ = cms.string("getZPt()")
+	tree.variables.MZ = cms.string("getZMass()")
+	tree.variables.WZchan = cms.string("getWZdecayMC()")
 
     if doTauEmbed == True:
         tree.variables.mctruth = cms.string("mcGenWeight()")
@@ -552,6 +607,18 @@ if IsoStudy:
 if SameSign:
   for X in "elel", "mumu", "elmu", "muel", "ellell":
     getattr(process,"%sTree"% X).cut = cms.string("q(0)*q(1) > 0 && !isSTA(0) && !isSTA(1) && leptEtaCut(2.4,2.5) && ptMax > 20 && ptMin > 10")
+
+
+# save all events
+if doNoFilter:
+  print ">> Dump all events"
+
+  for X in "elel", "mumu", "elmu", "muel", "ellell":
+    getattr(process,"%sTree"% X).cut = cms.string("1")
+
+  for X in "elel", "mumu", "elmu", "muel":
+    getattr(process,"skim%s%s"% (X,label)).cut = cms.string("nLep >= 0")
+
 
 
 

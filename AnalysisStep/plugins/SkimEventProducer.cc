@@ -48,7 +48,8 @@ SkimEventProducer::SkimEventProducer(const edm::ParameterSet& cfg) :
     fatJetTag_         = cfg.getParameter<edm::InputTag>("fatJetTag" ); 
     pfMetTag_          = cfg.getParameter<edm::InputTag>("pfMetTag"  ); 
     tcMetTag_          = cfg.getParameter<edm::InputTag>("tcMetTag"  ); 
-    chargedMetTag_     = cfg.getParameter<edm::InputTag>("chargedMetTag" ); 
+    chargedMetTag_     = cfg.getParameter<edm::InputTag>("chargedMetTag" );
+    pfMetTypeITag_      = cfg.getParameter<edm::InputTag>("pfMetTypeITag" );
     vtxTag_            = cfg.getParameter<edm::InputTag>("vtxTag"        );
     //    allCandsTag_    = cfg.getParameter<edm::InputTag>("allCandsTag"   );  // Needed for MVAMet
     chCandsTag_        = cfg.getParameter<edm::InputTag>("chCandsTag"    ); 
@@ -77,6 +78,7 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 {
     std::auto_ptr<std::vector<reco::SkimEvent> > skimEvent(new std::vector<reco::SkimEvent> );
 
+//     std::cout << " SkimEventProducer::produce :: hypoType_ = " << hypoType_ << std::endl;
     //SkimEvent::hypoType type = SkimEvent::hypoTypeByName(hypoType_);
 
     edm::Handle<reco::GenParticleCollection> genParticles;
@@ -85,7 +87,10 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     }
 
     edm::Handle<pat::JetCollection> fatJetH;
-    iEvent.getByLabel(fatJetTag_,fatJetH);
+    try {
+     iEvent.getByLabel(fatJetTag_,fatJetH);
+    }
+    catch (int e){}
 
     edm::Handle<pat::JetCollection> jetH;
     iEvent.getByLabel(jetTag_,jetH);
@@ -106,6 +111,9 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 
 //    edm::Handle<edm::ValueMap<reco::PFMET> > chargedMetH;
 //    iEvent.getByLabel(chargedMetTag_,chargedMetH);
+
+    edm::Handle<reco::PFMETCollection> pfMetTypeIH;
+    iEvent.getByLabel(pfMetTypeITag_,pfMetTypeIH);
 
     edm::Handle<reco::VertexCollection> vtxH;
     iEvent.getByLabel(vtxTag_,vtxH);
@@ -184,9 +192,12 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     //    makeJets      (lJetInfo, jetH, lVertices);
     //    makeVertices  (lVtxInfo, lVertices);
 
+    bool atLeastTwo = false;
+    bool atLeastOne = false;
 
     if(hypoType_==reco::SkimEvent::WWELEL){//ELEL
 //      std::cout << " reco::SkimEvent::WWELEL " << std::endl;
+//      std::cout << "     electrons->size() = " << electrons->size() << std::endl;
         for(size_t i=0;i<electrons->size();++i) {
             for(size_t j=i+1;j<electrons->size();++j) {
              float deltall = ROOT::Math::VectorUtil::DeltaR(electrons->at(i).p4(),electrons->at(j).p4());
@@ -215,11 +226,14 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
                 // Everything else
                  skimEvent->back().setTriggerBits(passBits);
                  skimEvent->back().setJets(jetH);
-                 skimEvent->back().setFatJets(fatJetH);
+                 if (!fatJetH.failedToGet()) {
+                  skimEvent->back().setFatJets(fatJetH);
+                 }
                  skimEvent->back().setJetRhoIso(rhoJetIso);
                  skimEvent->back().setPFMet(pfMetH);
 //                skimEvent->back().setTCMet(tcMetH);
 //                skimEvent->back().setChargedMet(chargedMetH->get(0));
+                 skimEvent->back().setPFMetTypeI(pfMetTypeIH);
                  skimEvent->back().setVertex(vtxH);
                  if(sptH.isValid()   ) skimEvent->back().setVtxSumPts(sptH);
                  if(spt2H.isValid()  ) skimEvent->back().setVtxSumPt2s(spt2H);
@@ -247,6 +261,7 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
                  }
 
                 //       skimEvent->back().setupJEC(l2File_,l3File_,resFile_);
+                 atLeastTwo = true;
              }
             }
         }//end loop on main lepton collection
@@ -287,11 +302,14 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
                 // Everything else
         skimEvent->back().setTriggerBits(passBits);
         skimEvent->back().setJets(jetH);
-        skimEvent->back().setFatJets(fatJetH);
+        if (!fatJetH.failedToGet()) {
+         skimEvent->back().setFatJets(fatJetH);
+        }
         skimEvent->back().setJetRhoIso(rhoJetIso);
         skimEvent->back().setPFMet(pfMetH);
 //                skimEvent->back().setTCMet(tcMetH);
 //                skimEvent->back().setChargedMet(chargedMetH->get(0));
+        skimEvent->back().setPFMetTypeI(pfMetTypeIH);
         skimEvent->back().setVertex(vtxH);
         if(sptH.isValid()   ) skimEvent->back().setVtxSumPts(sptH);
         if(spt2H.isValid()  ) skimEvent->back().setVtxSumPt2s(spt2H);
@@ -317,7 +335,7 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
         if (!(genJetTag_==edm::InputTag(""))) {
          skimEvent->back().setGenJets(genJetH);
         }
-
+        atLeastTwo = true;
                 //       skimEvent->back().setupJEC(l2File_,l3File_,resFile_);
        }
       }
@@ -356,11 +374,14 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
                 // Everything else
                 skimEvent->back().setTriggerBits(passBits);
                 skimEvent->back().setJets(jetH);
-                skimEvent->back().setFatJets(fatJetH);
+                if (!fatJetH.failedToGet()) {
+                 skimEvent->back().setFatJets(fatJetH);
+                }
                 skimEvent->back().setJetRhoIso(rhoJetIso);
                 skimEvent->back().setPFMet(pfMetH);
 //                skimEvent->back().setTCMet(tcMetH);
 //                skimEvent->back().setChargedMet(chargedMetH->get(0));
+                skimEvent->back().setPFMetTypeI(pfMetTypeIH);
                 skimEvent->back().setVertex(vtxH);
                 if(sptH.isValid()   ) skimEvent->back().setVtxSumPts(sptH);
                 if(spt2H.isValid()  ) skimEvent->back().setVtxSumPt2s(spt2H);
@@ -386,7 +407,7 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
                if (!(genJetTag_==edm::InputTag(""))) {
                   skimEvent->back().setGenJets(genJetH);
                }
-
+               atLeastTwo = true;
                 //       skimEvent->back().setupJEC(l2File_,l3File_,resFile_);
             }
            }
@@ -426,11 +447,14 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
                 // Everything else
                 skimEvent->back().setTriggerBits(passBits);
                 skimEvent->back().setJets(jetH);
-                skimEvent->back().setFatJets(fatJetH);
+                if (!fatJetH.failedToGet()) {
+                 skimEvent->back().setFatJets(fatJetH);
+                }
                 skimEvent->back().setJetRhoIso(rhoJetIso);
                 skimEvent->back().setPFMet(pfMetH);
 //                skimEvent->back().setTCMet(tcMetH);
 //                skimEvent->back().setChargedMet(chargedMetH->get(0));
+                skimEvent->back().setPFMetTypeI(pfMetTypeIH);
                 skimEvent->back().setVertex(vtxH);
                 if(sptH.isValid()   ) skimEvent->back().setVtxSumPts(sptH);
                 if(spt2H.isValid()  ) skimEvent->back().setVtxSumPt2s(spt2H);
@@ -456,16 +480,185 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
                if (!(genJetTag_==edm::InputTag(""))) {
                 skimEvent->back().setGenJets(genJetH);
                }
-
+               atLeastTwo = true;
                 //       skimEvent->back().setupJEC(l2File_,l3File_,resFile_);
             }
           }
         }//end loop on main lepton collection
-    }else{
+    } else{
         throw cms::Exception("BadInput") 
             << "ERROR: event type " << hypoType_ << " is not known" ;
     }
 
+    //---- no events saved --> but I want to save something for GEN information and unfolding
+    if (atLeastTwo == false) {
+//      std::cout << " SkimEventProducer::produce :: atLeastTwo = false " << std::endl;
+     //---- check at least one lepton
+     if (hypoType_==reco::SkimEvent::WWELEL) {  //---- ELEL is dummy here, it just stands for "I'm looking at electrons"
+//       std::cout << " SkimEventProducer::produce::singleEL" << std::endl;
+      for(size_t i=0;i<electrons->size();++i) {
+       skimEvent->push_back( *(new reco::SkimEvent(hypoType_) ) );
+       skimEvent->back().setEventInfo(iEvent);
+                // Leptons
+       skimEvent->back().setLepton(electrons,i);
+
+       for(size_t k=0;k<electrons->size();++k) {
+        if(k!=i) {
+         skimEvent->back().setExtraLepton(electrons,k);
+         skimEvent->back().setLepton(electrons,k);
+        }
+       }
+       for(size_t k=0;k<softs->size();++k) {
+        skimEvent->back().setSoftMuon(softs,k);
+       }
+         // Everything else
+       skimEvent->back().setTriggerBits(passBits);
+       skimEvent->back().setJets(jetH);
+       if (!fatJetH.failedToGet()) {
+        skimEvent->back().setFatJets(fatJetH);
+       }
+       skimEvent->back().setJetRhoIso(rhoJetIso);
+       skimEvent->back().setPFMet(pfMetH);
+//                skimEvent->back().setTCMet(tcMetH);
+//                skimEvent->back().setChargedMet(chargedMetH->get(0));
+       skimEvent->back().setPFMetTypeI(pfMetTypeIH);
+       skimEvent->back().setVertex(vtxH);
+       if(sptH.isValid()   ) skimEvent->back().setVtxSumPts(sptH);
+       if(spt2H.isValid()  ) skimEvent->back().setVtxSumPt2s(spt2H);
+       if(tagJetH.isValid()) skimEvent->back().setTagJets(tagJetH);
+       else                  skimEvent->back().setTagJets(jetH);
+       skimEvent->back().setChargedMetSmurf(doChMET(candsH,&electrons->at(i)));
+        //      skimEvent->back().setMvaMet(getMvaMet(&electrons->at(i), &muons->at(j), lPV, *pfMetH));
+         if(genParticles.isValid()) {
+          skimEvent->back().setGenParticles(genParticles);
+         }
+         if (!(mcGenWeightTag_==edm::InputTag(""))) {
+          skimEvent->back().setGenWeight(mcGenWeight);
+         }
+         if (!(mcGenEventInfoTag_==edm::InputTag(""))) {
+          skimEvent->back().setGenInfo(GenInfoHandle);
+         }
+         if (!(mcLHEEventInfoTag_==edm::InputTag(""))) {
+          skimEvent->back().setLHEinfo(productLHEHandle);
+         }
+         if (!(genMetTag_==edm::InputTag(""))) {
+          skimEvent->back().setGenMet(genMetH);
+         }
+         if (!(genJetTag_==edm::InputTag(""))) {
+          skimEvent->back().setGenJets(genJetH);
+         }
+        atLeastOne = true;
+      }
+     } else if(hypoType_==reco::SkimEvent::WWMUMU) { //---- MUMU is dummy here, it just stands for "I'm looking at muons"
+//       std::cout << " SkimEventProducer::produce::singleMU" << std::endl;
+      for(size_t i=0;i<muons->size();++i) {
+         skimEvent->push_back( *(new reco::SkimEvent(hypoType_) ) );
+         skimEvent->back().setEventInfo(iEvent);
+                // Leptons
+         skimEvent->back().setLepton(muons,i);
+
+         for(size_t k=0;k<muons->size();++k) {
+          if(k!=i) {
+           skimEvent->back().setExtraLepton(muons,k);
+           skimEvent->back().setLepton(muons,k);
+          }
+         }
+         for(size_t k=0;k<softs->size();++k) {
+          if( (softs->at(k).pt() != muons->at(i).pt() || softs->at(k).eta() != muons->at(i).eta()) ) 
+           skimEvent->back().setSoftMuon(softs,k);
+         }
+         // Everything else
+         skimEvent->back().setTriggerBits(passBits);
+         skimEvent->back().setJets(jetH);
+         if (!fatJetH.failedToGet()) {
+          skimEvent->back().setFatJets(fatJetH);
+         }
+         skimEvent->back().setJetRhoIso(rhoJetIso);
+         skimEvent->back().setPFMet(pfMetH);
+//                skimEvent->back().setTCMet(tcMetH);
+//                skimEvent->back().setChargedMet(chargedMetH->get(0));
+         skimEvent->back().setPFMetTypeI(pfMetTypeIH);
+         skimEvent->back().setVertex(vtxH);
+         if(sptH.isValid()   ) skimEvent->back().setVtxSumPts(sptH);
+         if(spt2H.isValid()  ) skimEvent->back().setVtxSumPt2s(spt2H);
+         if(tagJetH.isValid()) skimEvent->back().setTagJets(tagJetH);
+         else                  skimEvent->back().setTagJets(jetH);
+         skimEvent->back().setChargedMetSmurf(doChMET(candsH,&muons->at(i)));
+        //      skimEvent->back().setMvaMet(getMvaMet(&muons->at(i), &muons->at(j), lPV, *pfMetH));
+         if(genParticles.isValid()) {
+          skimEvent->back().setGenParticles(genParticles);
+         }
+         if (!(mcGenWeightTag_==edm::InputTag(""))) {
+          skimEvent->back().setGenWeight(mcGenWeight);
+         }
+         if (!(mcGenEventInfoTag_==edm::InputTag(""))) {
+          skimEvent->back().setGenInfo(GenInfoHandle);
+         }
+         if (!(mcLHEEventInfoTag_==edm::InputTag(""))) {
+          skimEvent->back().setLHEinfo(productLHEHandle);
+         }
+         if (!(genMetTag_==edm::InputTag(""))) {
+          skimEvent->back().setGenMet(genMetH);
+         }
+         if (!(genJetTag_==edm::InputTag(""))) {
+          skimEvent->back().setGenJets(genJetH);
+         }
+         atLeastOne = true;
+                //       skimEvent->back().setupJEC(l2File_,l3File_,resFile_);
+        }
+       }
+
+       //---- not even one lepton!
+       if (atLeastOne == false ) {
+        //---- what an unlikely event! Not even one lepton!
+        if(hypoType_==reco::SkimEvent::WWMUMU) { //---- MUMU is just dummy here
+          skimEvent->push_back( *(new reco::SkimEvent(hypoType_) ) );
+          skimEvent->back().setEventInfo(iEvent);
+                // Leptons
+          for(size_t k=0;k<softs->size();++k) {
+            skimEvent->back().setSoftMuon(softs,k);
+          }
+         // Everything else
+          skimEvent->back().setTriggerBits(passBits);
+          skimEvent->back().setJets(jetH);
+          if (!fatJetH.failedToGet()) {
+           skimEvent->back().setFatJets(fatJetH);
+          }
+          skimEvent->back().setJetRhoIso(rhoJetIso);
+          skimEvent->back().setPFMet(pfMetH);
+//                skimEvent->back().setTCMet(tcMetH);
+//                skimEvent->back().setChargedMet(chargedMetH->get(0));
+          skimEvent->back().setPFMetTypeI(pfMetTypeIH);
+          skimEvent->back().setVertex(vtxH);
+          if(sptH.isValid()   ) skimEvent->back().setVtxSumPts(sptH);
+          if(spt2H.isValid()  ) skimEvent->back().setVtxSumPt2s(spt2H);
+          if(tagJetH.isValid()) skimEvent->back().setTagJets(tagJetH);
+          else                  skimEvent->back().setTagJets(jetH);
+          skimEvent->back().setChargedMetSmurf(doChMET(candsH));
+        //      skimEvent->back().setMvaMet(getMvaMet(&muons->at(i), &muons->at(j), lPV, *pfMetH));
+          if(genParticles.isValid()) {
+           skimEvent->back().setGenParticles(genParticles);
+          }
+          if (!(mcGenWeightTag_==edm::InputTag(""))) {
+           skimEvent->back().setGenWeight(mcGenWeight);
+          }
+          if (!(mcGenEventInfoTag_==edm::InputTag(""))) {
+           skimEvent->back().setGenInfo(GenInfoHandle);
+          }
+          if (!(mcLHEEventInfoTag_==edm::InputTag(""))) {
+           skimEvent->back().setLHEinfo(productLHEHandle);
+          }
+          if (!(genMetTag_==edm::InputTag(""))) {
+           skimEvent->back().setGenMet(genMetH);
+          }
+          if (!(genJetTag_==edm::InputTag(""))) {
+           skimEvent->back().setGenJets(genJetH);
+          }
+                //       skimEvent->back().setupJEC(l2File_,l3File_,resFile_);
+         }
+        }
+
+      }
 
     for (size_t jevent=0; jevent<skimEvent->size(); jevent++) {
 
@@ -474,6 +667,7 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
       addDYMVA(event);
     }
 
+//     std::cout << " SkimEventProducer::produce :: DONE " << std::endl;
 
     iEvent.put(skimEvent);
 }
@@ -496,6 +690,23 @@ reco::MET SkimEventProducer::doChMET(edm::Handle<reco::CandidateView> candsH,
     return met;
 }
 
+
+reco::MET SkimEventProducer::doChMET(edm::Handle<reco::CandidateView> candsH,
+        const reco::Candidate* cand1){
+    using namespace std;
+    reco::Candidate::LorentzVector totalP4;
+    for(reco::CandidateView::const_iterator it= candsH->begin(), ed =candsH->end(); it != ed; ++it){
+        if( it->charge() == 0 ) continue;
+        if (cand1 != 0x0) 
+         if(fabs(ROOT::Math::VectorUtil::DeltaR(it->p4(),cand1->p4())) <=0.1) continue;
+        totalP4 += it->p4();
+    }
+    if (cand1 != 0x0) 
+     totalP4 +=cand1->p4();
+    reco::Candidate::LorentzVector invertedP4(-totalP4);
+    reco::MET met(invertedP4,reco::Candidate::Point(0,0,0));
+    return met;
+}
 
 void SkimEventProducer::addDYMVA(reco::SkimEvent* event)
 {

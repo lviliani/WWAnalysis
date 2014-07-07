@@ -22,6 +22,7 @@ skimEventProducer = cms.EDProducer('SkimEventProducer',
     pfMetTag      = cms.InputTag("pfMet"),
     tcMetTag      = cms.InputTag("tcMet"),
     chargedMetTag = cms.InputTag("trackMetProducer"),
+    pfMetTypeITag      = cms.InputTag("pfType1CorrectedMet"),
     vtxTag        = cms.InputTag("goodPrimaryVertices"),
 ###    allCandsTag    = cms.InputTag("allReducedPFCands"),  ### Needed for MVAMet
     chCandsTag    = cms.InputTag("reducedPFCands"),
@@ -105,7 +106,7 @@ def addEventHypothesis(process,label,thisMuTag,thisEleTag,thisSoftMuTag='wwMuons
     tempSkimEventFilter = cms.EDFilter("SkimEventSelector",
        src = cms.InputTag(""),
        filter = cms.bool(True),
-       cut = cms.string("nLep >=2 "),                                   
+       cut = cms.string("nLep >=2 "),
     )
 
     for hypo in hypos:
