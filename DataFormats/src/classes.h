@@ -79,6 +79,8 @@ namespace
 //   <class name="edm::Wrapper<std::vector<std::vector<FactorizedJetCorrector::VarTypes> > >"/>
 
 
+    std::map<unsigned int,std::vector<std::pair<unsigned int,int> > > test;
+
   };
 }
 
