@@ -25,10 +25,10 @@ options.register ( 'summary',
                   'Print run summary')
 
 options.register ('eventsToProcess',
-				  '',
-				  opts.VarParsing.multiplicity.list,
-				  opts.VarParsing.varType.string,
-				  'Events to process')
+                  '',
+                  opts.VarParsing.multiplicity.list,
+                  opts.VarParsing.varType.string,
+                  'Events to process')
 
 options.register ('skipEvents',
                   0,                                        # default value
@@ -37,16 +37,16 @@ options.register ('skipEvents',
                   'Number of events to skip')
 
 options.register ('label',
-				  'XXX',
-				  opts.VarParsing.multiplicity.singleton,
-				  opts.VarParsing.varType.string,
-				  'Label')
+                  'XXX',
+                  opts.VarParsing.multiplicity.singleton,
+                  opts.VarParsing.varType.string,
+                  'Label')
 
 options.register ('json',
-				  'YYY',
-				  opts.VarParsing.multiplicity.singleton,
-				  opts.VarParsing.varType.string,
-				  'Json file for data')
+                  'YYY',
+                  opts.VarParsing.multiplicity.singleton,
+                  opts.VarParsing.varType.string,
+                  'Json file for data')
 
 options.register ('id',
                   0,                                        # default value
@@ -108,12 +108,6 @@ options.register ('doLHE',
                        opts.VarParsing.varType.bool,
                        'Turn on LHE dumper (can be \'True\' or \'False\'')
 
-options.register ('typeLHEcomment',
-                  0,                                        # default value
-                  opts.VarParsing.multiplicity.singleton,   # singleton or list
-                  opts.VarParsing.varType.int,              # string, int, or float
-                  'type of comment in LHE, 0 [default] powheg scale variation, 1 MG for anomalous couplings')
-
 options.register ('doGen',
                        False,                                    # default value
                        opts.VarParsing.multiplicity.singleton,   # singleton or list
@@ -163,15 +157,16 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 if options.acceptDuplicates :
     process.source = cms.Source('PoolSource',
-          fileNames  = cms.untracked.vstring( options.inputFiles ),
+          fileNames = cms.untracked.vstring([LISTOFFILES]),
           skipEvents = cms.untracked.uint32( options.skipEvents ),
           duplicateCheckMode  = cms.untracked.string('noDuplicateCheck'),
           )
 else :
     process.source = cms.Source('PoolSource',
-          fileNames  = cms.untracked.vstring( options.inputFiles ),
+          fileNames = cms.untracked.vstring([LISTOFFILES]),
           skipEvents = cms.untracked.uint32( options.skipEvents ),
           )
+
 
 process.source.inputCommands = cms.untracked.vstring( "keep *", "drop *_conditionsInEdm_*_*",  "drop *_MEtoEDMConverter_*_*")
 
@@ -302,7 +297,6 @@ doSusy           = options.doSusy
 doTauEmbed       = options.doTauEmbed
 SameSign         = options.doSameSign
 doNoFilter       = options.doNoFilter
-typeLHEcomment  =  options.typeLHEcomment
 
 
 id = 0
@@ -456,18 +450,16 @@ for X in "elel", "mumu", "elmu", "muel":
 
     if doLHE == True :
         getattr(process,"ww%s%s"% (X,label)).mcLHEEventInfoTag = "source"
-        getattr(process,"ww%s%s"% (X,label)).whichLHE = cms.untracked.int32(typeLHEcomment)
 
     if doGen == True :
         getattr(process,"ww%s%s"% (X,label)).genParticlesTag = "prunedGen"
         getattr(process,"ww%s%s"% (X,label)).genMetTag = "genMetTrue"
-	getattr(process,"ww%s%s"% (X,label)).genJetTag = cms.InputTag("ak5GenJetsNoElNoMuNoNu","","Yield")
+    getattr(process,"ww%s%s"% (X,label)).genJetTag = cms.InputTag("selectedPatJets","genJets","Yield")
 
     if doGenVV == True :
-        getattr(process,"ww%s%s"% (X,label)).mcLHEEventInfoTag = "source"
         getattr(process,"ww%s%s"% (X,label)).genParticlesTag = "prunedGen"
         getattr(process,"ww%s%s"% (X,label)).genMetTag = "genMetTrue"
-	getattr(process,"ww%s%s"% (X,label)).genJetTag = cms.InputTag("ak5GenJetsNoElNoMuNoNu","","Yield")
+    getattr(process,"ww%s%s"% (X,label)).genJetTag = cms.InputTag("selectedPatJets","genJets","Yield")
 
     if id in ["036", "037", "037c0", "037c1", "037c2", "037c3", "037c4", "037c5", "037c6", "037c7", "037c8", "037c9", "042", "043", "045", "046" ]: # DY-Madgraph sample
         getattr(process,"ww%s%s"% (X,label)).genParticlesTag = "prunedGen"
@@ -495,12 +487,6 @@ for X in "elel", "mumu", "elmu", "muel", "ellell":
      tree.variables.HEPMCweightScale4 = cms.string("HEPMCweightScale(4)")
      tree.variables.HEPMCweightScale5 = cms.string("HEPMCweightScale(5)")
      tree.variables.HEPMCweightScale6 = cms.string("HEPMCweightScale(6)")
-
-     if typeLHEcomment == 1 :
-        #import ROOT
-        for i in range (70) :
-            #ROOT.gROOT.ProcessLine("tree.variables.HEPMCweightScale" + str(i+7) + " = cms.string(\"HEPMCweightScale(" + str(i+7) + ")\")")
-            exec("tree.variables.HEPMCweightScale" + str(i+7) + " = cms.string(\"HEPMCweightScale(" + str(i+7) + ")\")")
 
      tree.variables.HEPMCweightRen0 = cms.string("HEPMCweightRen(0)")
      tree.variables.HEPMCweightRen1 = cms.string("HEPMCweightRen(1)")
@@ -569,9 +555,9 @@ for X in "elel", "mumu", "elmu", "muel", "ellell":
             tree.variables.mctruth = cms.string("getFinalStateMC()")
 
     if id in ["077", "078", "074" ]: 
-	tree.variables.PtZ = cms.string("getZPt()")
-	tree.variables.MZ = cms.string("getZMass()")
-	tree.variables.WZchan = cms.string("getWZdecayMC()")
+      tree.variables.PtZ = cms.string("getZPt()")
+      tree.variables.MZ = cms.string("getZMass()")
+      tree.variables.WZchan = cms.string("getWZdecayMC()")
 
     if doTauEmbed == True:
         tree.variables.mctruth = cms.string("mcGenWeight()")
@@ -607,7 +593,7 @@ for X in "elel", "mumu", "elmu", "muel", "ellell":
     else: # path not already set up
         setattr(process,'sel'+X+label, cms.Path(seq))
 
-process.TFileService = cms.Service("TFileService",fileName = cms.string(options.outputFile))
+process.TFileService = cms.Service("TFileService",fileName = cms.string("OUTPUTFILENAME.root"))
 
 
 if IsoStudy:

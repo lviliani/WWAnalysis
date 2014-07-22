@@ -4186,9 +4186,9 @@ const float reco::SkimEvent::genVVLeptonPID(size_t a, bool onlyS1) const {
   const reco::Candidate* mcH = 0;
   // loop over gen particles
  for(size_t gp=0; gp<genParticles_.size();++gp){
-   int type  = abs( genParticles_[gp] -> pdgId() );
+   int type  =  genParticles_[gp] -> pdgId();
    int status = genParticles_[gp] -> status();
-   if( (type == 11 || type == 13 || type == 15) && ((status == 3 && !onlyS1) || (status == 1 && onlyS1)) ) {
+   if( (abs(type) == 11 || abs(type) == 13 || abs(type) == 15) && ((status == 3 && !onlyS1) || (status == 1 && onlyS1)) ) {
      mcH = &(*(genParticles_[gp]));
      if( mcH->pt() != pt_ofIndex) continue;
      particleID = (float) type;
@@ -4328,9 +4328,9 @@ const float reco::SkimEvent::genVVNeutrinoPID(size_t a) const {
  const reco::Candidate* mcH = 0;
   // loop over gen particles
  for(size_t gp=0; gp<genParticles_.size();++gp){
-   int type  = abs( genParticles_[gp] -> pdgId() );
+   int type  = genParticles_[gp] -> pdgId();
    int status = genParticles_[gp] -> status();
-   if( (type == 12 || type == 14 || type == 16) && (status == 3) ) {
+   if( (abs(type) == 12 || abs(type) == 14 || abs(type) == 16) && (status == 3) ) {
      mcH = &(*(genParticles_[gp]));
      if( mcH->pt() != pt_ofIndex) continue;
      particleID = (float) type;
