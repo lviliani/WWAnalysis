@@ -8,3 +8,15 @@ prepare:
 submit:
 
     sh lancia.sh
+
+
+
+
+backup
+====
+
+where
+
+    /afs/cern.ch/user/a/amassiro/work/Latinos/Framework/CMSSW_5_3_11_patch6/src/WWAnalysis/SkimStep/test/lxbatch
+
+
