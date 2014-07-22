@@ -52,55 +52,58 @@ class SkimEventProducer : public edm::EDProducer {
 
 
     private:
-        virtual void beginJob() ;
-        virtual void produce(edm::Event&, const edm::EventSetup&);
-        virtual void endJob() ;
-	reco::MET doChMET(edm::Handle<reco::CandidateView> candsH,
-			  const reco::Candidate* cand1,const reco::Candidate* cand2);
-    reco::MET doChMET(edm::Handle<reco::CandidateView> candsH,
-                      const reco::Candidate* cand1 = 0x0);
+        
+     virtual void beginJob() ;
+     virtual void produce(edm::Event&, const edm::EventSetup&);
+     virtual void endJob() ;
+     reco::MET doChMET(edm::Handle<reco::CandidateView> candsH,
+                       const reco::Candidate* cand1,const reco::Candidate* cand2);
+     reco::MET doChMET(edm::Handle<reco::CandidateView> candsH,
+                       const reco::Candidate* cand1 = 0x0);
  
-        std::string branchAlias_;
-    	reco::SkimEvent::hypoType hypoType_;
+     std::string branchAlias_;
+     reco::SkimEvent::hypoType hypoType_;
 
-        edm::InputTag triggerTag_;
-        TriggerBitChecker singleMuData_;
-        TriggerBitChecker singleElData_;
-        TriggerBitChecker doubleMuData_;
-        TriggerBitChecker doubleElData_;
-        TriggerBitChecker muEGData_;
-        TriggerBitChecker singleMuMC_;
-        TriggerBitChecker singleElMC_;
-        TriggerBitChecker doubleMuMC_;
-        TriggerBitChecker doubleElMC_;
-        TriggerBitChecker muEGMC_;
-        TriggerBitChecker AllEmbed_;
+     edm::InputTag triggerTag_;
+     TriggerBitChecker singleMuData_;
+     TriggerBitChecker singleElData_;
+     TriggerBitChecker doubleMuData_;
+     TriggerBitChecker doubleElData_;
+     TriggerBitChecker muEGData_;
+     TriggerBitChecker singleMuMC_;
+     TriggerBitChecker singleElMC_;
+     TriggerBitChecker doubleMuMC_;
+     TriggerBitChecker doubleElMC_;
+     TriggerBitChecker muEGMC_;
+     TriggerBitChecker AllEmbed_;
 
-        edm::InputTag mcLHEEventInfoTag_;
-        edm::InputTag mcGenEventInfoTag_;
-        edm::InputTag mcGenWeightTag_;
-        edm::InputTag genParticlesTag_;
-        edm::InputTag genMetTag_;
-        edm::InputTag genJetTag_;
-        edm::InputTag muTag_;
-        edm::InputTag elTag_;
-        edm::InputTag softMuTag_;
-        edm::InputTag jetTag_;
-        edm::InputTag fatJetTag_;
-        edm::InputTag tagJetTag_;
-        edm::InputTag pfMetTag_;
-        edm::InputTag tcMetTag_;
-        edm::InputTag chargedMetTag_;
-        edm::InputTag pfMetTypeITag_;
-        edm::InputTag vtxTag_;
-	//        edm::InputTag allCandsTag_;  // Needed for MVAMet
-        edm::InputTag chCandsTag_;
-        edm::InputTag sptTag_;
-        edm::InputTag spt2Tag_;
-	//        std::string l2File_;
-	//        std::string l3File_;
-	//        std::string resFile_;
+     edm::InputTag mcLHEEventInfoTag_;
+     edm::InputTag mcGenEventInfoTag_;
+     edm::InputTag mcGenWeightTag_;
+     edm::InputTag genParticlesTag_;
+     edm::InputTag genMetTag_;
+     edm::InputTag genJetTag_;
+     edm::InputTag muTag_;
+     edm::InputTag elTag_;
+     edm::InputTag softMuTag_;
+     edm::InputTag jetTag_;
+     edm::InputTag fatJetTag_;
+     edm::InputTag tagJetTag_;
+     edm::InputTag pfMetTag_;
+     edm::InputTag tcMetTag_;
+     edm::InputTag chargedMetTag_;
+     edm::InputTag pfMetTypeITag_;
+     edm::InputTag vtxTag_;
+    //        edm::InputTag allCandsTag_;  // Needed for MVAMet
+     edm::InputTag chCandsTag_;
+     edm::InputTag sptTag_;
+     edm::InputTag spt2Tag_;
+    //        std::string l2File_;
+    //        std::string l3File_;
+    //        std::string resFile_;
       
+     int whichLHE_;
+
 	GetDYMVA *getDYMVA_v0;
 	GetDYMVA *getDYMVA_v1;
 

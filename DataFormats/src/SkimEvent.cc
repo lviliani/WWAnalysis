@@ -176,7 +176,7 @@ void reco::SkimEvent::setGenJets(const edm::Handle<reco::GenJetCollection> & h) 
 }
 
 // set LHEinfo
-void reco::SkimEvent::setLHEinfo(const edm::Handle<LHEEventProduct> & h) {
+void reco::SkimEvent::setLHEinfo(const edm::Handle<LHEEventProduct> & h, int whichKind) {
  LHEhepeup_ = (*(h.product())).hepeup();
 
  std::vector<std::string>::const_iterator it_end = (*(h.product())).comments_end();
@@ -191,17 +191,27 @@ void reco::SkimEvent::setLHEinfo(const edm::Handle<LHEEventProduct> & h) {
   /// #new weight,renfact,facfact,pdf1,pdf2    32.2346904790193        1.00000000000000        1.00000000000000            11000       11000  lha
   std::stringstream line( comments_LHE_.at(iComm) );
   std::string dummy;
-  line >> dummy;  // #new weight,renfact,facfact,pdf1,pdf2
-  float dummy_float;
-  line >> dummy_float; //  32.2346904790193
-  comments_LHE_weight_.push_back(dummy_float);
-//   std::cout << dummy_float << std::endl;
-  line >> dummy_float; //  1.00000000000000
-  comments_LHE_rfac_.push_back(dummy_float);
-//   std::cout << dummy_float << std::endl;
-  line >> dummy_float; //  1.00000000000000
-  comments_LHE_ffac_.push_back(dummy_float);
-//   std::cout << dummy_float << std::endl;
+  if (iComm != 0) { //---- skip first line for anomalous couplings weight
+   line >> dummy;  // #new weight,renfact,facfact,pdf1,pdf2  -> with no spaces!
+   if (whichKind == 1) {
+//    new weights for WW2j anomalous couplings 
+//    #wgt id='mg_reweight_1'> +3.5793777e-06 
+//    -> weigth is ok! What a luck!
+    line >> dummy;
+   }
+
+//   std::cout << " string = " << dummy << std::endl;
+   float dummy_float;
+   line >> dummy_float; //  32.2346904790193
+   comments_LHE_weight_.push_back(dummy_float);
+//   std::cout << " weight = " << dummy_float << std::endl;
+   line >> dummy_float; //  1.00000000000000
+   comments_LHE_rfac_.push_back(dummy_float);
+//   std::cout << " rfac = " << dummy_float << std::endl;
+   line >> dummy_float; //  1.00000000000000
+   comments_LHE_ffac_.push_back(dummy_float);
+//   std::cout << " ffac = " << dummy_float << std::endl;
+  }
  }
 
 }

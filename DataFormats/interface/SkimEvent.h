@@ -444,7 +444,7 @@ namespace reco {
             void setVtxSumPts(const edm::Handle<edm::ValueMap<float> > &s);
             void setVtxSumPt2s(const edm::Handle<edm::ValueMap<float> > &s);
             void setGenParticles(const edm::Handle<reco::GenParticleCollection> &h);
-            void setLHEinfo(const edm::Handle<LHEEventProduct> & h);
+            void setLHEinfo(const edm::Handle<LHEEventProduct> & h, int whichKind=0);
 
 //            void setGenWeight(const edm::Handle<double> &s);
             void setGenWeight(const edm::Handle<GenFilterInfo> &s);

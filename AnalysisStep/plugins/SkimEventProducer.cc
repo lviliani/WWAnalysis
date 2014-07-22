@@ -59,6 +59,8 @@ SkimEventProducer::SkimEventProducer(const edm::ParameterSet& cfg) :
     if (cfg.exists("spt2Tag"   )) spt2Tag_    = cfg.getParameter<edm::InputTag>("spt2Tag"   ); 
     else                          spt2Tag_    = edm::InputTag("","","");
 
+    whichLHE_        = cfg.getUntrackedParameter<int>("whichLHE",0);
+
     produces<std::vector<reco::SkimEvent> >().setBranchAlias(cfg.getParameter<std::string>("@module_label"));
 
     getDYMVA_v0 = new GetDYMVA(0);
@@ -251,7 +253,7 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
                   skimEvent->back().setGenInfo(GenInfoHandle);
                  }
                  if (!(mcLHEEventInfoTag_==edm::InputTag(""))) {
-                  skimEvent->back().setLHEinfo(productLHEHandle);
+                  skimEvent->back().setLHEinfo(productLHEHandle, whichLHE_);
                  }
                  if (!(genMetTag_==edm::InputTag(""))) {
                   skimEvent->back().setGenMet(genMetH);
@@ -327,7 +329,7 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
          skimEvent->back().setGenInfo(GenInfoHandle);
         }
         if (!(mcLHEEventInfoTag_==edm::InputTag(""))) {
-         skimEvent->back().setLHEinfo(productLHEHandle);
+         skimEvent->back().setLHEinfo(productLHEHandle, whichLHE_);
         }
         if (!(genMetTag_==edm::InputTag(""))) {
          skimEvent->back().setGenMet(genMetH);
@@ -399,7 +401,7 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
                 skimEvent->back().setGenInfo(GenInfoHandle);
                }
                if (!(mcLHEEventInfoTag_==edm::InputTag(""))) {
-                skimEvent->back().setLHEinfo(productLHEHandle);
+                skimEvent->back().setLHEinfo(productLHEHandle, whichLHE_);
                }
                if (!(genMetTag_==edm::InputTag(""))) {
                 skimEvent->back().setGenMet(genMetH);
@@ -472,7 +474,7 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
                 skimEvent->back().setGenInfo(GenInfoHandle);
                }
                if (!(mcLHEEventInfoTag_==edm::InputTag(""))) {
-                skimEvent->back().setLHEinfo(productLHEHandle);
+                skimEvent->back().setLHEinfo(productLHEHandle, whichLHE_);
                }
                if (!(genMetTag_==edm::InputTag(""))) {
                 skimEvent->back().setGenMet(genMetH);
@@ -539,7 +541,7 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
           skimEvent->back().setGenInfo(GenInfoHandle);
          }
          if (!(mcLHEEventInfoTag_==edm::InputTag(""))) {
-          skimEvent->back().setLHEinfo(productLHEHandle);
+          skimEvent->back().setLHEinfo(productLHEHandle, whichLHE_);
          }
          if (!(genMetTag_==edm::InputTag(""))) {
           skimEvent->back().setGenMet(genMetH);
@@ -595,7 +597,7 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
           skimEvent->back().setGenInfo(GenInfoHandle);
          }
          if (!(mcLHEEventInfoTag_==edm::InputTag(""))) {
-          skimEvent->back().setLHEinfo(productLHEHandle);
+          skimEvent->back().setLHEinfo(productLHEHandle, whichLHE_);
          }
          if (!(genMetTag_==edm::InputTag(""))) {
           skimEvent->back().setGenMet(genMetH);
@@ -646,7 +648,7 @@ void SkimEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
            skimEvent->back().setGenInfo(GenInfoHandle);
           }
           if (!(mcLHEEventInfoTag_==edm::InputTag(""))) {
-           skimEvent->back().setLHEinfo(productLHEHandle);
+           skimEvent->back().setLHEinfo(productLHEHandle, whichLHE_);
           }
           if (!(genMetTag_==edm::InputTag(""))) {
            skimEvent->back().setGenMet(genMetH);

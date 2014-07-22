@@ -108,6 +108,12 @@ options.register ('doLHE',
                        opts.VarParsing.varType.bool,
                        'Turn on LHE dumper (can be \'True\' or \'False\'')
 
+options.register ('typeLHEcomment',
+                  0,                                        # default value
+                  opts.VarParsing.multiplicity.singleton,   # singleton or list
+                  opts.VarParsing.varType.int,              # string, int, or float
+                  'type of comment in LHE, 0 [default] powheg scale variation, 1 MG for anomalous couplings')
+
 options.register ('doGen',
                        False,                                    # default value
                        opts.VarParsing.multiplicity.singleton,   # singleton or list
@@ -296,6 +302,7 @@ doSusy           = options.doSusy
 doTauEmbed       = options.doTauEmbed
 SameSign         = options.doSameSign
 doNoFilter       = options.doNoFilter
+typeLHEcomment  =  options.typeLHEcomment
 
 
 id = 0
@@ -449,6 +456,7 @@ for X in "elel", "mumu", "elmu", "muel":
 
     if doLHE == True :
         getattr(process,"ww%s%s"% (X,label)).mcLHEEventInfoTag = "source"
+        getattr(process,"ww%s%s"% (X,label)).whichLHE = cms.untracked.int32(typeLHEcomment)
 
     if doGen == True :
         getattr(process,"ww%s%s"% (X,label)).genParticlesTag = "prunedGen"
@@ -486,6 +494,12 @@ for X in "elel", "mumu", "elmu", "muel", "ellell":
      tree.variables.HEPMCweightScale4 = cms.string("HEPMCweightScale(4)")
      tree.variables.HEPMCweightScale5 = cms.string("HEPMCweightScale(5)")
      tree.variables.HEPMCweightScale6 = cms.string("HEPMCweightScale(6)")
+
+     if typeLHEcomment == 1 :
+        #import ROOT
+        for i in range (70) :
+            #ROOT.gROOT.ProcessLine("tree.variables.HEPMCweightScale" + str(i+7) + " = cms.string(\"HEPMCweightScale(" + str(i+7) + ")\")")
+            exec("tree.variables.HEPMCweightScale" + str(i+7) + " = cms.string(\"HEPMCweightScale(" + str(i+7) + ")\")")
 
      tree.variables.HEPMCweightRen0 = cms.string("HEPMCweightRen(0)")
      tree.variables.HEPMCweightRen1 = cms.string("HEPMCweightRen(1)")
