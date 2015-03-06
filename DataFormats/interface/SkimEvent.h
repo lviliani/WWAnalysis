@@ -377,7 +377,10 @@ namespace reco {
             const float LHEMetEta() const;
 
       	    const float higgsLHEPt() const;
-            
+           
+            const float leadingGenJetPartonBPt(size_t a) const;
+            const float leadingGenJetPartonBEta(size_t a) const;                    
+            const float leadingGenJetPartonBPhi(size_t a) const;                    
             const float leadingGenJetPartonPt(size_t a) const;
             const float leadingGenJetPartonPID(size_t a) const;
             const float leadingGenJetPartonEta(size_t a) const;

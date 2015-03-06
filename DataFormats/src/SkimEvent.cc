@@ -3892,6 +3892,71 @@ const float reco::SkimEvent::higgsLHEPt() const {
 }
 
 
+const float reco::SkimEvent::leadingGenJetPartonBPt(size_t index) const {
+ std::vector<float> v_jets_pt ;
+
+//   std::cout << " getSusyMass1 " << std::endl;
+ float pt = -9999.9;
+
+ const reco::Candidate* mcH = 0;
+
+  // loop over gen particles
+ for(size_t gp=0; gp<genParticles_.size();++gp){
+  int type  = abs( genParticles_[gp] -> pdgId() );
+  int status = genParticles_[gp] -> status();
+
+   // Stop {1000006}
+  if( (type == 5) && (status == 3) ) {
+   mcH = &(*(genParticles_[gp]));
+   v_jets_pt.push_back( mcH->pt() );
+  }
+ } // loop over gen particles
+
+if (v_jets_pt.size () > 0) {
+  std::sort (v_jets_pt.rbegin (), v_jets_pt.rend ()) ;
+ }
+ //---- now return ----
+ size_t count = 0;
+ for(size_t i=0;i<v_jets_pt.size();++i) {
+  if(++count > index) return v_jets_pt.at(i);
+ }
+
+ return pt;
+}
+
+const float reco::SkimEvent::leadingGenJetPartonBEta(size_t index) const {
+ float pt_ofIndex = leadingGenJetPartonBPt(index);
+ float particleEta=-9999.9;
+ const reco::Candidate* mcH = 0;
+  // loop over gen particles
+ for(size_t gp=0; gp<genParticles_.size();++gp){
+   int type  = abs( genParticles_[gp] -> pdgId() );
+   int status = genParticles_[gp] -> status();
+   if( (type == 5) && (status == 3) ) {
+     mcH = &(*(genParticles_[gp]));
+     if( mcH->pt() != pt_ofIndex) continue;
+     particleEta = (float) mcH->eta();
+   }
+ } // loop over gen particles
+ return particleEta;
+}
+
+const float reco::SkimEvent::leadingGenJetPartonBPhi(size_t index) const {
+ float pt_ofIndex = leadingGenJetPartonBPt(index);
+ float particlePhi=-9999.9;
+ const reco::Candidate* mcH = 0;
+  // loop over gen particles
+ for(size_t gp=0; gp<genParticles_.size();++gp){
+   int type  = abs( genParticles_[gp] -> pdgId() );
+   int status = genParticles_[gp] -> status();
+   if( (type == 5) && (status == 3) ) {
+     mcH = &(*(genParticles_[gp]));
+     if( mcH->pt() != pt_ofIndex) continue;
+     particlePhi = (float) mcH->phi();
+   }
+ } // loop over gen particles
+ return particlePhi;
+}
 
 const float reco::SkimEvent::leadingGenJetPartonPt(size_t index) const {
  std::vector<float> v_jets_pt ;
@@ -3924,6 +3989,8 @@ if (v_jets_pt.size () > 0) {
 
  return pt;
 }
+
+
 
 const float reco::SkimEvent::leadingGenJetPartonPID(size_t index) const {
  float pt_ofIndex = leadingGenJetPartonPt(index);
