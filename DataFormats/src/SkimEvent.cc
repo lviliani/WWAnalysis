@@ -3904,7 +3904,7 @@ const float reco::SkimEvent::leadingGenJetPartonBPt(size_t index) const {
  for(size_t gp=0; gp<genParticles_.size();++gp){
   int type  = abs( genParticles_[gp] -> pdgId() );
   int status = genParticles_[gp] -> status();
-  int mother_type = abs( genParticles_[gp] -> mother() -> pdgId() );
+  int mother_type = genParticles_[gp] -> mother()!= 0 ? abs( genParticles_[gp] -> mother() -> pdgId() ) : 0;
   bool has_top_mother = genParticles_[gp] -> mother()!= 0 ?  (mother_type == 6) : false;
 
    // Stop {1000006}
@@ -3934,7 +3934,7 @@ const float reco::SkimEvent::leadingGenJetPartonBEta(size_t index) const {
  for(size_t gp=0; gp<genParticles_.size();++gp){
    int type  = abs( genParticles_[gp] -> pdgId() );
    int status = genParticles_[gp] -> status();
-   int mother_type = abs( genParticles_[gp] -> mother() -> pdgId() );
+   int mother_type = genParticles_[gp] -> mother()!= 0 ? abs( genParticles_[gp] -> mother() -> pdgId() ) : 0;
    bool has_top_mother = genParticles_[gp] -> mother()!= 0 ?  (mother_type == 6) : false;
 
    if( (type == 5) && (status == 3) && (has_top_mother) ) {
@@ -3954,7 +3954,7 @@ const float reco::SkimEvent::leadingGenJetPartonBPhi(size_t index) const {
  for(size_t gp=0; gp<genParticles_.size();++gp){
    int type  = abs( genParticles_[gp] -> pdgId() );
    int status = genParticles_[gp] -> status();
-   int mother_type = abs( genParticles_[gp] -> mother() -> pdgId() );
+   int mother_type = genParticles_[gp] -> mother()!= 0 ? abs( genParticles_[gp] -> mother() -> pdgId() ) : 0;
    bool has_top_mother = genParticles_[gp] -> mother()!= 0 ?  (mother_type == 6) : false;
 
    if( (type == 5) && (status == 3) && (has_top_mother) ) {
